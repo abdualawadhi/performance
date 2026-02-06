@@ -79,6 +79,9 @@ export default function ProfessionalDashboard() {
     { id: 'regular_use_case', name: 'Regular Use Case', description: 'Typical user interactions', icon: '👆' },
     { id: 'heavy_list_load', name: 'List Load', description: 'Large dataset loading', icon: '📋' },
     { id: 'upfront_scripting', name: 'Scripting', description: 'JavaScript execution test', icon: '⚡' },
+    { id: 'form_submission', name: 'Form Processing', description: 'Submit and validation test', icon: '📝' },
+    { id: 'data_filtering', name: 'Data Filtering', description: 'Search and filter performance', icon: '🔍' },
+    { id: 'page_navigation', name: 'Navigation', description: 'Multi-page transition test', icon: '🚀' },
   ]
 
   useEffect(() => {

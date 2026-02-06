@@ -80,15 +80,13 @@ class CoreWebVitals(BaseModel):
         if self.speed_index_ms == 0:
             load_score = 30  # Poor score for unmeasured load time
         else:
-            load_score = max(0, 100 - (self.speed_index_ms - 3000) * 0.02)  # 3s = 100, 53s = 0
+            load_score = max(
+                0, 100 - (self.speed_index_ms - 3000) * 0.02
+            )  # 3s = 100, 53s = 0
 
-        # Weighted average - prioritize load performance
+        # Weighted average - equal 25% weights for all components
         cwv_score = (
-            load_score * 0.4
-            + lcp_score * 0.2
-            + fid_score * 0.2
-            + cls_score * 0.1
-            + speed_score * 0.1
+            load_score * 0.25 + lcp_score * 0.25 + fid_score * 0.25 + cls_score * 0.25
         )
 
         return min(100, max(0, cwv_score))
@@ -144,13 +142,15 @@ class MemoryUsageMetrics(BaseModel):
         # Penalize high peak memory usage more aggressively
         base_score = 100
 
-        # Peak memory penalty - start penalizing above 15MB (more realistic threshold)
-        if self.peak_heap_size_mb > 15:
-            base_score -= (self.peak_heap_size_mb - 15) * 2  # 2 points per MB over 15MB
-        
-        # Additional penalty for very high memory usage (>50MB)
-        if self.peak_heap_size_mb > 50:
-            base_score -= (self.peak_heap_size_mb - 50) * 1  # Additional penalty
+        # Peak memory penalty - start penalizing above 100MB (more realistic threshold)
+        if self.peak_heap_size_mb > 100:
+            base_score -= (
+                self.peak_heap_size_mb - 100
+            ) * 0.5  # 0.5 points per MB over 100MB
+
+        # Additional penalty for very high memory usage (>500MB)
+        if self.peak_heap_size_mb > 500:
+            base_score -= (self.peak_heap_size_mb - 500) * 0.2  # Additional penalty
 
         # GC penalty
         base_score -= self.major_gc_count * 2
@@ -225,11 +225,15 @@ class NetworkMetrics(BaseModel):
 
         # Request count penalty - start penalizing above 25 requests (more realistic)
         if self.total_requests > 25:
-            base_score -= (self.total_requests - 25) * 0.5  # 0.5 points per request over 25
+            base_score -= (
+                self.total_requests - 25
+            ) * 0.5  # 0.5 points per request over 25
 
         # Transfer size penalty - start penalizing above 500KB (more realistic)
         if self.total_transfer_size_kb > 500:
-            base_score -= (self.total_transfer_size_kb - 500) * 0.02  # 0.02 points per KB over 500KB
+            base_score -= (
+                self.total_transfer_size_kb - 500
+            ) * 0.02  # 0.02 points per KB over 500KB
 
         # Failed requests penalty
         if self.total_requests > 0:
@@ -360,17 +364,23 @@ class AccessibilityViolation(BaseModel):
     """Accessibility violation details."""
 
     id: str = Field(..., description="Rule ID")
-    impact: Optional[str] = Field(None, description="Impact level (minor, moderate, serious, critical)")
+    impact: Optional[str] = Field(
+        None, description="Impact level (minor, moderate, serious, critical)"
+    )
     description: str = Field(..., description="Rule description")
     help_url: str = Field(..., description="URL for more help")
-    nodes: List[Dict[str, Any]] = Field(default_factory=list, description="Failing DOM nodes")
+    nodes: List[Dict[str, Any]] = Field(
+        default_factory=list, description="Failing DOM nodes"
+    )
 
 
 class AccessibilityMetrics(BaseModel):
     """Accessibility metrics from Axe."""
 
     score: float = Field(default=100.0, description="Accessibility score (0-100)")
-    violations: List[AccessibilityViolation] = Field(default_factory=list, description="List of violations")
+    violations: List[AccessibilityViolation] = Field(
+        default_factory=list, description="List of violations"
+    )
     passes: int = Field(default=0, description="Number of passed rules")
     incomplete: int = Field(default=0, description="Number of incomplete rules")
     inapplicable: int = Field(default=0, description="Number of inapplicable rules")
@@ -398,9 +408,11 @@ class ScenarioMetrics(BaseModel):
     accessibility_metrics: Optional[AccessibilityMetrics] = Field(
         None, description="Accessibility metrics"
     )
-    
+
     # Load Time Metrics
-    load_time_s: float = Field(default=0.0, ge=0, description="Total page load time in seconds")
+    load_time_s: float = Field(
+        default=0.0, ge=0, description="Total page load time in seconds"
+    )
 
     # Platform Metrics
     platform_metrics: PlatformSpecificMetrics = Field(
@@ -451,33 +463,38 @@ class ScenarioMetrics(BaseModel):
 
     # Multi-run statistics
     standard_deviation: float = Field(
-        default=0.0, ge=0, description="Standard deviation of performance scores across runs"
+        default=0.0,
+        ge=0,
+        description="Standard deviation of performance scores across runs",
     )
     confidence_level: ConfidenceLevel = Field(
-        default=ConfidenceLevel.TENTATIVE, description="Confidence level of measurements"
+        default=ConfidenceLevel.TENTATIVE,
+        description="Confidence level of measurements",
     )
     num_runs: int = Field(default=1, ge=1, description="Number of test runs averaged")
-    
+
     # Advanced statistical measures
     confidence_interval_95: Tuple[float, float] = Field(
-        default=(0.0, 0.0), 
-        description="95% confidence interval for performance score (lower, upper)"
+        default=(0.0, 0.0),
+        description="95% confidence interval for performance score (lower, upper)",
     )
     coefficient_of_variation: float = Field(
-        default=0.0, ge=0, 
-        description="Coefficient of variation (percentage) for performance metrics"
+        default=0.0,
+        ge=0,
+        description="Coefficient of variation (percentage) for performance metrics",
     )
     outlier_run_indices: List[int] = Field(
-        default_factory=list, 
-        description="Indices of runs identified as outliers using IQR method"
+        default_factory=list,
+        description="Indices of runs identified as outliers using IQR method",
     )
     interquartile_range: float = Field(
-        default=0.0, ge=0, 
-        description="Interquartile range (Q3 - Q1) for performance score distribution"
+        default=0.0,
+        ge=0,
+        description="Interquartile range (Q3 - Q1) for performance score distribution",
     )
     quartiles: Tuple[float, float, float] = Field(
-        default=(0.0, 0.0, 0.0), 
-        description="Quartiles (Q1, Q2, Q3) for performance score distribution"
+        default=(0.0, 0.0, 0.0),
+        description="Quartiles (Q1, Q2, Q3) for performance score distribution",
     )
 
     @computed_field
@@ -489,7 +506,7 @@ class ScenarioMetrics(BaseModel):
             load_score = 30  # Poor score for unmeasured load time
         else:
             load_score = max(0, 100 - (self.load_time_s - 3) * 8)  # 3s = 100, 15.5s = 0
-        
+
         # Component scores
         cwv_score = self.core_web_vitals.performance_score * 0.3
         memory_score = self.memory_metrics.memory_efficiency_score * 0.2
