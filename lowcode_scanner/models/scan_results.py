@@ -64,7 +64,8 @@ class PerformanceMatrixRow(BaseModel):
         default=0.0, ge=0, le=100, description="Overall performance score"
     )
     confidence_level: ConfidenceLevel = Field(
-        default=ConfidenceLevel.TENTATIVE, description="Confidence level of measurements"
+        default=ConfidenceLevel.TENTATIVE,
+        description="Confidence level of measurements",
     )
     standard_deviation: float = Field(
         default=0.0, ge=0, description="Standard deviation of performance scores"
@@ -90,6 +91,14 @@ class PerformanceMatrixRow(BaseModel):
     # Resource Metrics
     total_requests: int = Field(default=0, ge=0, description="Total number of requests")
     total_size_kb: float = Field(default=0.0, ge=0, description="Total page size in KB")
+    resource_breakdown: Dict[str, int] = Field(
+        default_factory=dict, description="Resource type breakdown"
+    )
+
+    # Memory Timeline
+    memory_samples: List[Dict[str, float]] = Field(
+        default_factory=list, description="Memory samples over time"
+    )
 
     # Platform-specific
     platform_specific_metrics: Dict[str, Any] = Field(
@@ -168,9 +177,18 @@ class PerformanceMatrixRow(BaseModel):
             largest_contentful_paint_ms=scenario_metrics.core_web_vitals.largest_contentful_paint_ms,
             time_to_interactive_ms=scenario_metrics.core_web_vitals.time_to_interactive_ms,
             cumulative_layout_shift=scenario_metrics.core_web_vitals.cumulative_layout_shift,
-            accessibility_score=scenario_metrics.accessibility_metrics.score if scenario_metrics.accessibility_metrics else 100.0,
+            accessibility_score=(
+                scenario_metrics.accessibility_metrics.score
+                if scenario_metrics.accessibility_metrics
+                else 100.0
+            ),
             total_requests=scenario_metrics.network_metrics.total_requests,
             total_size_kb=scenario_metrics.network_metrics.total_transfer_size_kb,
+            resource_breakdown=scenario_metrics.network_metrics.resource_breakdown.copy(),
+            memory_samples=[
+                {k: v for k, v in s.items()}
+                for s in scenario_metrics.memory_metrics.memory_samples
+            ],
             platform_specific_metrics={
                 "platform": scenario_metrics.platform_metrics.platform.value,
                 "client_side_processing_ms": scenario_metrics.platform_metrics.client_side_processing_ms,
@@ -292,14 +310,16 @@ class PerformanceMatrix(BaseModel):
                 self.overall_score
             ).value,
             "critical_scenarios_count": len(self.critical_scenarios),
-            "average_load_time_s": sum(row.load_time_s for row in self.rows)
-            / len(self.rows)
-            if self.rows
-            else 0,
-            "average_memory_usage_mb": sum(row.memory_usage_max_mb for row in self.rows)
-            / len(self.rows)
-            if self.rows
-            else 0,
+            "average_load_time_s": (
+                sum(row.load_time_s for row in self.rows) / len(self.rows)
+                if self.rows
+                else 0
+            ),
+            "average_memory_usage_mb": (
+                sum(row.memory_usage_max_mb for row in self.rows) / len(self.rows)
+                if self.rows
+                else 0
+            ),
             "total_recommendations": len(self.key_recommendations),
         }
 
@@ -564,17 +584,19 @@ class ScanSession(BaseModel):
             "total_scans": self.total_urls_scanned,
             "successful_scans": self.successful_scans,
             "failed_scans": self.failed_scans,
-            "success_rate": (self.successful_scans / self.total_urls_scanned * 100)
-            if self.total_urls_scanned > 0
-            else 0,
+            "success_rate": (
+                (self.successful_scans / self.total_urls_scanned * 100)
+                if self.total_urls_scanned > 0
+                else 0
+            ),
             "average_performance_score": average_score,
             "performance_category": PerformanceCategory.from_score(average_score).value,
             "platforms_tested": len(self.platform_distribution),
             "platform_distribution": self.platform_distribution,
             "total_duration_s": self.total_duration_s,
-            "start_time": self.start_timestamp.isoformat()
-            if self.start_timestamp
-            else None,
+            "start_time": (
+                self.start_timestamp.isoformat() if self.start_timestamp else None
+            ),
             "end_time": self.end_timestamp.isoformat() if self.end_timestamp else None,
         }
 

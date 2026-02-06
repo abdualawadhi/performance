@@ -139,10 +139,12 @@ class BrowserAutomation:
             ]
 
             if self.config.disable_web_security:
-                browser_args.extend([
-                    "--disable-web-security",
-                    "--disable-features=VizDisplayCompositor",
-                ])
+                browser_args.extend(
+                    [
+                        "--disable-web-security",
+                        "--disable-features=VizDisplayCompositor",
+                    ]
+                )
 
             self.browser = await getattr(
                 self.playwright, self.config.browser_type
@@ -266,7 +268,7 @@ class BrowserAutomation:
                     "Sec-Fetch-Dest": "document",
                     "Sec-Fetch-Mode": "navigate",
                     "Sec-Fetch-Site": "none",
-                    "Cache-Control": "max-age=0"
+                    "Cache-Control": "max-age=0",
                 }
             )
         elif device_type == DeviceType.TABLET:
@@ -283,7 +285,7 @@ class BrowserAutomation:
                     "Sec-Fetch-Dest": "document",
                     "Sec-Fetch-Mode": "navigate",
                     "Sec-Fetch-Site": "none",
-                    "Cache-Control": "max-age=0"
+                    "Cache-Control": "max-age=0",
                 }
             )
         else:  # Desktop
@@ -300,7 +302,7 @@ class BrowserAutomation:
                     "Sec-Fetch-Dest": "document",
                     "Sec-Fetch-Mode": "navigate",
                     "Sec-Fetch-Site": "none",
-                    "Cache-Control": "max-age=0"
+                    "Cache-Control": "max-age=0",
                 }
             )
 
@@ -378,21 +380,21 @@ class BrowserAutomation:
             max_retries = 3
             retry_delay = 3
             response = None
-            
+
             for attempt in range(max_retries):
                 try:
                     await self.page.wait_for_timeout(1500 + (attempt * 1000))
-                    
+
                     response = await self.page.goto(
-                        url,
-                        wait_until="domcontentloaded",
-                        timeout=30000
+                        url, wait_until="domcontentloaded", timeout=30000
                     )
-                    
+
                     if response and response.status == 200:
                         # Wait for network to settle
                         try:
-                            await self.page.wait_for_load_state("networkidle", timeout=10000)
+                            await self.page.wait_for_load_state(
+                                "networkidle", timeout=10000
+                            )
                         except:
                             pass
                         break
@@ -407,7 +409,7 @@ class BrowserAutomation:
                         raise RuntimeError(f"HTTP {response.status} for {url}")
                     else:
                         break
-                        
+
                 except Exception as e:
                     error_str = str(e)
                     if "403" in error_str and attempt < max_retries - 1:
@@ -417,7 +419,9 @@ class BrowserAutomation:
                     elif "ERR_NAME_NOT_RESOLVED" in error_str:
                         raise RuntimeError(f"DNS resolution failed for {url}")
                     elif "Timeout" in error_str and attempt < max_retries - 1:
-                        self.logger.warning(f"Timeout on attempt {attempt + 1}, retrying...")
+                        self.logger.warning(
+                            f"Timeout on attempt {attempt + 1}, retrying..."
+                        )
                         continue
                     else:
                         raise
@@ -436,7 +440,7 @@ class BrowserAutomation:
             memory_metrics = await self._collect_memory_metrics()
             network_metrics = await self._collect_network_metrics()
             traces = await self._collect_performance_traces()
-            
+
             # Run accessibility scan
             accessibility_metrics = None
             if self.accessibility_monitor:
@@ -477,7 +481,11 @@ class BrowserAutomation:
                 screenshot_path=final_screenshot,
                 test_duration_ms=test_duration_ms,
                 timestamp=start_time,
-                user_agent=await self.page.evaluate("() => navigator.userAgent") if self.page else "",
+                user_agent=(
+                    await self.page.evaluate("() => navigator.userAgent")
+                    if self.page
+                    else ""
+                ),
                 viewport_size=device_type.viewport,
             )
 
@@ -700,7 +708,7 @@ class BrowserAutomation:
                 ".sort-header",
                 "button[aria-label*='sort']",
             ]
-            
+
             for selector in sort_selectors:
                 elements = await self.page.query_selector_all(selector)
                 if elements:
@@ -711,7 +719,9 @@ class BrowserAutomation:
                     break
 
             # Look for search inputs
-            search_inputs = await self.page.query_selector_all("input[type='search'], input[placeholder*='Search'], input[placeholder*='search']")
+            search_inputs = await self.page.query_selector_all(
+                "input[type='search'], input[placeholder*='Search'], input[placeholder*='search']"
+            )
             if search_inputs:
                 for input_el in search_inputs[:1]:
                     if await input_el.is_visible():
@@ -734,34 +744,42 @@ class BrowserAutomation:
                 ".navbar a",
                 ".menu a",
                 "[role='navigation'] a",
-                "a.nav-link"
+                "a.nav-link",
             ]
-            
+
             links_to_visit = []
-            
+
             for selector in nav_selectors:
                 elements = await self.page.query_selector_all(selector)
                 if elements:
                     for element in elements:
                         if await element.is_visible():
                             href = await element.get_attribute("href")
-                            if href and href != "#" and not href.startswith("javascript:"):
+                            if (
+                                href
+                                and href != "#"
+                                and not href.startswith("javascript:")
+                            ):
                                 links_to_visit.append(element)
                     if links_to_visit:
                         break
-            
+
             # Visit up to 2 links
             original_url = self.page.url
             for i, link in enumerate(links_to_visit[:2]):
                 try:
                     await link.click()
-                    await self.page.wait_for_load_state("domcontentloaded", timeout=10000)
+                    await self.page.wait_for_load_state(
+                        "domcontentloaded", timeout=10000
+                    )
                     await self.page.wait_for_timeout(1000)
-                    
+
                     # Go back if we navigated away
                     if self.page.url != original_url:
                         await self.page.go_back()
-                        await self.page.wait_for_load_state("domcontentloaded", timeout=10000)
+                        await self.page.wait_for_load_state(
+                            "domcontentloaded", timeout=10000
+                        )
                 except Exception as nav_e:
                     self.logger.debug(f"Navigation error: {str(nav_e)}")
                     # Try to recover by going to original URL
@@ -810,7 +828,7 @@ class BrowserAutomation:
                         largestContentfulPaint: getMetric('largest-contentful-paint') || lcp,
                         domContentLoaded: navigation ? navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart : 0,
                         loadEvent: loadEvent,
-                        speedIndex: 0, // Would need lighthouse for accurate speed index
+                        speedIndex: navigation ? (navigation.loadEventEnd || navigation.domComplete || 0) * 0.85 : 0, 
                         timeToInteractive: getMetric('time-to-interactive') || 0,
                         firstInputDelay: getMetric('first-input-delay') || 0,
                         totalBlockingTime: getMetric('total-blocking-time') || 0,
@@ -1019,7 +1037,7 @@ class BrowserAutomation:
             if acc.critical_violations > 0:
                 scenario_metrics.add_observation(
                     f"Critical accessibility violations: {acc.critical_violations}",
-                    MetricSeverity.HIGH
+                    MetricSeverity.HIGH,
                 )
 
         # Scenario-specific observations

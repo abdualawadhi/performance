@@ -26,7 +26,9 @@ class AccessibilityMonitor:
         """Inject Axe-core script into the page."""
         try:
             # Check if axe is already defined
-            is_defined = await self.page.evaluate("() => typeof window.axe !== 'undefined'")
+            is_defined = await self.page.evaluate(
+                "() => typeof window.axe !== 'undefined'"
+            )
             if is_defined:
                 return
 
@@ -100,7 +102,7 @@ class AccessibilityMonitor:
                 # Cap deduction per rule to avoid negative score from one rule with many nodes
                 deduction = weight * len(v.nodes)
                 # Normalize deduction
-                score -= min(deduction, 20.0) 
+                score -= min(deduction, 20.0)
 
             score = max(0.0, score)
 
@@ -114,4 +116,7 @@ class AccessibilityMonitor:
 
         except Exception as e:
             self.logger.error(f"Error running accessibility scan: {str(e)}")
-            return None
+            # Return default metrics with 0 score to indicate failure/not tested
+            return AccessibilityMetrics(
+                score=0.0, violations=[], passes=0, incomplete=0, inapplicable=0
+            )

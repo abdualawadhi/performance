@@ -27,12 +27,14 @@ from .reporting.excel_export import export_all_formats
 
 def get_aggregated_scenarios(result) -> List[Dict[str, Any]]:
     """Aggregate performance data by scenario using CLI logic."""
-    rows = getattr(result.performance_matrix, 'rows', []) or []
+    rows = getattr(result.performance_matrix, "rows", []) or []
     per_scenario = {}
     unique_obs = []
 
     for row in rows:
-        scenario_name = getattr(row.scenario, 'display_name', None) or getattr(row.scenario, 'name', str(row.scenario))
+        scenario_name = getattr(row.scenario, "display_name", None) or getattr(
+            row.scenario, "name", str(row.scenario)
+        )
         if scenario_name not in per_scenario:
             per_scenario[scenario_name] = []
         per_scenario[scenario_name].append(row)
@@ -40,39 +42,52 @@ def get_aggregated_scenarios(result) -> List[Dict[str, Any]]:
     # Calculate aggregated metrics (same as CLI)
     aggregated_scenarios = []
     for scenario_name, scenario_rows in per_scenario.items():
-        load_times = [getattr(r, 'load_time_s', getattr(r, 'load_time', 0) or 0) for r in scenario_rows]
-        memories = [getattr(r, 'memory_usage_max_mb', getattr(r, 'memory', 0) or 0) for r in scenario_rows]
-        scores = [getattr(r, 'performance_score', getattr(r, 'overall_score', 0) or 0) for r in scenario_rows]
-        accessibility_scores = [getattr(r, 'accessibility_score', 100) for r in scenario_rows]
+        load_times = [
+            getattr(r, "load_time_s", getattr(r, "load_time", 0) or 0)
+            for r in scenario_rows
+        ]
+        memories = [
+            getattr(r, "memory_usage_max_mb", getattr(r, "memory", 0) or 0)
+            for r in scenario_rows
+        ]
+        scores = [
+            getattr(r, "performance_score", getattr(r, "overall_score", 0) or 0)
+            for r in scenario_rows
+        ]
+        accessibility_scores = [
+            getattr(r, "accessibility_score", 100) for r in scenario_rows
+        ]
 
         avg_load = statistics.mean(load_times) if load_times else 0
         avg_mem = statistics.mean(memories) if memories else 0
         avg_score = statistics.mean(scores) if scores else 0
-        avg_accessibility = statistics.mean(accessibility_scores) if accessibility_scores else 100
+        avg_accessibility = (
+            statistics.mean(accessibility_scores) if accessibility_scores else 100
+        )
 
         # Performance traces - calculate averages
         scripting_times = []
         rendering_times = []
         painting_times = []
         observations = []
-        
+
         for r in scenario_rows:
-            scripting_time = getattr(r, 'scripting_time_ms', None)
+            scripting_time = getattr(r, "scripting_time_ms", None)
             if scripting_time is not None:
                 scripting_times.append(scripting_time)
-            
-            rendering_time = getattr(r, 'rendering_time_ms', None)
+
+            rendering_time = getattr(r, "rendering_time_ms", None)
             if rendering_time is not None:
                 rendering_times.append(rendering_time)
-            
-            painting_time = getattr(r, 'painting_time_ms', None)
+
+            painting_time = getattr(r, "painting_time_ms", None)
             if painting_time is not None:
                 painting_times.append(painting_time)
-            
-            for o in (getattr(r, 'key_observations', None) or []):
+
+            for o in getattr(r, "key_observations", None) or []:
                 if o and o not in observations:
                     observations.append(o)
-        
+
         # Create aggregated trace string
         trace_parts = []
         if scripting_times:
@@ -81,18 +96,30 @@ def get_aggregated_scenarios(result) -> List[Dict[str, Any]]:
             trace_parts.append(f"Rendering: {statistics.mean(rendering_times):.1f}ms")
         if painting_times:
             trace_parts.append(f"Painting: {statistics.mean(painting_times):.1f}ms")
-        
-        aggregated_trace = ', '.join(trace_parts) if trace_parts else 'No traces'
 
-        aggregated_scenarios.append({
-            'name': scenario_name,
-            'score': avg_score,
-            'accessibility_score': avg_accessibility,
-            'load_time': avg_load,
-            'memory': avg_mem,
-            'traces': aggregated_trace,
-            'observations': observations
-        })
+        aggregated_trace = ", ".join(trace_parts) if trace_parts else "No traces"
+
+        aggregated_scenarios.append(
+            {
+                "name": scenario_name,
+                "score": avg_score,
+                "accessibility_score": avg_accessibility,
+                "load_time": avg_load,
+                "memory": avg_mem,
+                "traces": aggregated_trace,
+                "observations": observations,
+                "resource_breakdown": (
+                    getattr(scenario_rows[0], "resource_breakdown", {})
+                    if scenario_rows
+                    else {}
+                ),
+                "memory_samples": (
+                    getattr(scenario_rows[0], "memory_samples", [])
+                    if scenario_rows
+                    else []
+                ),
+            }
+        )
 
     return aggregated_scenarios
 
@@ -100,20 +127,22 @@ def get_aggregated_scenarios(result) -> List[Dict[str, Any]]:
 def generate_json_report(result, url: str, session_name: str) -> Dict[str, Any]:
     """Generate JSON report using CLI logic."""
     from datetime import datetime
-    
-    overall_score = getattr(result.performance_matrix, 'overall_score', 0)
-    platform = getattr(result, 'platform', 'generic')
-    platform_str = platform.value if hasattr(platform, 'value') else str(platform)
-    
+
+    overall_score = getattr(result.performance_matrix, "overall_score", 0)
+    platform = getattr(result, "platform", "generic")
+    platform_str = platform.value if hasattr(platform, "value") else str(platform)
+
     # Get the actual scan ID from the result, fallback to session_name
-    actual_scan_id = getattr(result, 'scan_id', session_name)
-    
+    actual_scan_id = getattr(result, "scan_id", session_name)
+
     aggregated_scenarios = get_aggregated_scenarios(result)
-    exec_summary = get_enhanced_executive_summary(overall_score, get_unique_observations(result))['summary_line']
-    
+    exec_summary = get_enhanced_executive_summary(
+        overall_score, get_unique_observations(result)
+    )["summary_line"]
+
     # Add statistical analysis to JSON report
     statistical_analysis = _generate_statistical_analysis(result)
-    
+
     # Build comprehensive JSON report
     return {
         "schema_version": "2.0.0",
@@ -123,25 +152,20 @@ def generate_json_report(result, url: str, session_name: str) -> Dict[str, Any]:
         "metadata": {
             "platform": platform_str,
             "scan_id": actual_scan_id,
-            "overall_score": overall_score
+            "overall_score": overall_score,
         },
         "scenarios": [
             {
-                "name": scenario['name'],
-                "overall_score": scenario['score'],
-                "load_time_ms": scenario['load_time'] * 1000,
-                "memory_peak_mb": scenario['memory'],
-                "core_web_vitals": {
-                    "fcp_ms": 0,
-                    "lcp_ms": 0,
-                    "cls": 0.0,
-                    "tti_ms": 0
-                }
+                "name": scenario["name"],
+                "overall_score": scenario["score"],
+                "load_time_ms": scenario["load_time"] * 1000,
+                "memory_peak_mb": scenario["memory"],
+                "core_web_vitals": {"fcp_ms": 0, "lcp_ms": 0, "cls": 0.0, "tti_ms": 0},
             }
             for scenario in aggregated_scenarios
         ],
         "statistical_analysis": statistical_analysis,
-        "executive_summary": exec_summary
+        "executive_summary": exec_summary,
     }
 
 
@@ -151,123 +175,156 @@ def _generate_statistical_analysis(result) -> Dict[str, Any]:
         from .utils.statistics import (
             calculate_statistical_summary,
             calculate_correlation_matrix,
-            confidence_interval
+            confidence_interval,
         )
-        
+
         # Extract scenarios and performance data
         scenarios = {}
-        rows = getattr(result.performance_matrix, 'rows', [])
+        rows = getattr(result.performance_matrix, "rows", [])
         for row in rows:
             scenarios[row.scenario] = row
-        
+
         if not scenarios:
             return {
                 "available": False,
-                "message": "Insufficient data for statistical analysis"
+                "message": "Insufficient data for statistical analysis",
             }
-        
+
         # Collect performance scores for statistical analysis
         performance_scores = []
         lcp_scores = []
         memory_scores = []
         load_time_scores = []
-        
+
         for scenario in scenarios.values():
             performance_scores.append(scenario.performance_score)
             lcp_scores.append(scenario.largest_contentful_paint_ms)
             memory_scores.append(scenario.memory_usage_max_mb)
             load_time_scores.append(scenario.load_time_s * 1000)  # Convert to ms
-        
+
         # Calculate statistical summaries
         perf_stats = calculate_statistical_summary(performance_scores)
         lcp_stats = calculate_statistical_summary(lcp_scores)
         memory_stats = calculate_statistical_summary(memory_scores)
         load_time_stats = calculate_statistical_summary(load_time_scores)
-        
+
         # Calculate correlation matrix
         correlation_data = {
-            'performance_score': performance_scores,
-            'lcp_ms': lcp_scores,
-            'memory_mb': memory_scores,
-            'load_time_ms': load_time_scores
+            "performance_score": performance_scores,
+            "lcp_ms": lcp_scores,
+            "memory_mb": memory_scores,
+            "load_time_ms": load_time_scores,
         }
         correlation_matrix = calculate_correlation_matrix(correlation_data)
-        
+
         # Calculate overall confidence intervals
         overall_ci = confidence_interval(performance_scores, 0.95)
-        
+
         # Count outliers across all scenarios
         total_outliers = 0
         # Note: PerformanceMatrixRow doesn't have outlier_run_indices field
         # This would be available in the original ScenarioMetrics
         # For now, we'll skip outlier counting in the JSON export
-        
+
         return {
             "available": True,
             "sample_size": len(performance_scores),
             "performance_score_statistics": {
-                "mean": perf_stats['mean'],
-                "median": perf_stats['median'],
-                "std_dev": perf_stats['std_dev'],
-                "min": perf_stats['min'],
-                "max": perf_stats['max'],
-                "range": perf_stats['range'],
-                "coefficient_of_variation": perf_stats['coefficient_of_variation'],
-                "confidence_interval_95": perf_stats['confidence_interval_95'],
-                "ci_notation": f"{perf_stats['mean']:.2f} ± {(perf_stats['confidence_interval_95'][1] - perf_stats['confidence_interval_95'][0])/2:.2f}"
+                "mean": perf_stats["mean"],
+                "median": perf_stats["median"],
+                "std_dev": perf_stats["std_dev"],
+                "min": perf_stats["min"],
+                "max": perf_stats["max"],
+                "range": perf_stats["range"],
+                "coefficient_of_variation": perf_stats["coefficient_of_variation"],
+                "confidence_interval_95": perf_stats["confidence_interval_95"],
+                "ci_notation": f"{perf_stats['mean']:.2f} ± {(perf_stats['confidence_interval_95'][1] - perf_stats['confidence_interval_95'][0])/2:.2f}",
             },
             "lcp_statistics": {
-                "mean": lcp_stats['mean'],
-                "std_dev": lcp_stats['std_dev'],
-                "confidence_interval_95": lcp_stats['confidence_interval_95']
+                "mean": lcp_stats["mean"],
+                "std_dev": lcp_stats["std_dev"],
+                "confidence_interval_95": lcp_stats["confidence_interval_95"],
             },
             "memory_statistics": {
-                "mean": memory_stats['mean'],
-                "std_dev": memory_stats['std_dev'],
-                "confidence_interval_95": memory_stats['confidence_interval_95']
+                "mean": memory_stats["mean"],
+                "std_dev": memory_stats["std_dev"],
+                "confidence_interval_95": memory_stats["confidence_interval_95"],
             },
             "load_time_statistics": {
-                "mean": load_time_stats['mean'],
-                "std_dev": load_time_stats['std_dev'],
-                "confidence_interval_95": load_time_stats['confidence_interval_95']
+                "mean": load_time_stats["mean"],
+                "std_dev": load_time_stats["std_dev"],
+                "confidence_interval_95": load_time_stats["confidence_interval_95"],
             },
             "correlation_matrix": correlation_matrix,
             "overall_confidence_interval": {
                 "lower": overall_ci[0],
                 "upper": overall_ci[1],
                 "margin_of_error": (overall_ci[1] - overall_ci[0]) / 2,
-                "relative_margin": ((overall_ci[1] - overall_ci[0]) / 2) / perf_stats['mean'] if perf_stats['mean'] != 0 else 0
+                "relative_margin": (
+                    ((overall_ci[1] - overall_ci[0]) / 2) / perf_stats["mean"]
+                    if perf_stats["mean"] != 0
+                    else 0
+                ),
             },
             "outlier_analysis": {
                 "total_outliers": total_outliers,
-                "outlier_rate": total_outliers / sum(s.num_runs for s in scenarios.values()) if scenarios else 0,
+                "outlier_rate": (
+                    total_outliers / sum(s.num_runs for s in scenarios.values())
+                    if scenarios
+                    else 0
+                ),
                 "scenarios_with_outliers": [
                     {
                         "scenario": s.scenario.display_name,
                         "outlier_count": len(s.outlier_run_indices),
-                        "outlier_indices": s.outlier_run_indices
+                        "outlier_indices": s.outlier_run_indices,
                     }
-                    for s in scenarios.values() if s.outlier_run_indices
-                ]
+                    for s in scenarios.values()
+                    if s.outlier_run_indices
+                ],
             },
             "reliability_assessment": {
-                "sample_size_adequacy": "Adequate" if len(performance_scores) >= 5 else "Insufficient",
-                "variability_level": "Low" if perf_stats['coefficient_of_variation'] < 5 else "Moderate" if perf_stats['coefficient_of_variation'] < 15 else "High",
-                "confidence_level": "High" if perf_stats['coefficient_of_variation'] < 10 else "Moderate" if perf_stats['coefficient_of_variation'] < 20 else "Low",
-                "outlier_impact": "Significant" if total_outliers > len(scenarios) else "Moderate" if total_outliers > 0 else "None"
-            }
+                "sample_size_adequacy": (
+                    "Adequate" if len(performance_scores) >= 5 else "Insufficient"
+                ),
+                "variability_level": (
+                    "Low"
+                    if perf_stats["coefficient_of_variation"] < 5
+                    else (
+                        "Moderate"
+                        if perf_stats["coefficient_of_variation"] < 15
+                        else "High"
+                    )
+                ),
+                "confidence_level": (
+                    "High"
+                    if perf_stats["coefficient_of_variation"] < 10
+                    else (
+                        "Moderate"
+                        if perf_stats["coefficient_of_variation"] < 20
+                        else "Low"
+                    )
+                ),
+                "outlier_impact": (
+                    "Significant"
+                    if total_outliers > len(scenarios)
+                    else "Moderate" if total_outliers > 0 else "None"
+                ),
+            },
         }
-        
+
     except Exception as e:
         return {
             "available": False,
-            "message": f"Error generating statistical analysis: {str(e)}"
+            "message": f"Error generating statistical analysis: {str(e)}",
         }
 
 
-def get_enhanced_executive_summary(overall_score: float, unique_observations: List[str]) -> Dict[str, Any]:
+def get_enhanced_executive_summary(
+    overall_score: float, unique_observations: List[str]
+) -> Dict[str, Any]:
     """Generate an enhanced executive summary with detailed sections."""
-    
+
     # Key Findings: Take top 3-5 most critical observations.
     # For now, we'll just take the first 5, but this could be improved
     # by assigning severity levels to observations.
@@ -294,29 +351,36 @@ def get_enhanced_executive_summary(overall_score: float, unique_observations: Li
             recommendations.append(f"Prioritize: {obs}")
         else:
             recommendations.append(f"Consider optimizing: {obs}")
-    
-    priority_recommendations = recommendations[:5] # Limit to top 5
+
+    priority_recommendations = recommendations[:5]  # Limit to top 5
 
     summary = {
         "overall_performance_score": f"{overall_score:.1f}",
         "key_findings": key_findings,
         "business_impact_assessment": business_impact,
-        "priority_recommendations": priority_recommendations
+        "priority_recommendations": priority_recommendations,
     }
-    
+
     # Add a basic summary line based on score
     if overall_score >= 90:
-        summary["summary_line"] = "Excellent performance with optimal user experience across all metrics."
+        summary["summary_line"] = (
+            "Excellent performance with optimal user experience across all metrics."
+        )
     elif overall_score >= 80:
         summary["summary_line"] = "Good performance with minor optimizations possible."
     elif overall_score >= 70:
-        summary["summary_line"] = "Acceptable performance but several areas need improvement."
+        summary["summary_line"] = (
+            "Acceptable performance but several areas need improvement."
+        )
     elif overall_score >= 60:
         summary["summary_line"] = "Poor performance requiring significant optimization."
     else:
-        summary["summary_line"] = "Critical performance issues requiring immediate attention."
-        
+        summary["summary_line"] = (
+            "Critical performance issues requiring immediate attention."
+        )
+
     return summary
+
 
 def get_executive_summary(overall_score: float) -> str:
     """Generate a simple executive summary line based on score (backward compatibility)."""
@@ -335,32 +399,42 @@ def get_executive_summary(overall_score: float) -> str:
 def generate_html_report(result, url: str, session_name: str) -> str:
     """Generate professional HTML report with enterprise-grade design and visualizations."""
 
-    overall_score = getattr(result.performance_matrix, 'overall_score', 0)
-    platform = getattr(result, 'platform', 'generic')
-    platform_str = platform.value if hasattr(platform, 'value') else str(platform)
+    overall_score = getattr(result.performance_matrix, "overall_score", 0)
+    platform = getattr(result, "platform", "generic")
+    platform_str = platform.value if hasattr(platform, "value") else str(platform)
 
     aggregated_scenarios = get_aggregated_scenarios(result)
     unique_observations = get_unique_observations(result)
 
     # Get enhanced executive summary data
-    enhanced_summary = get_enhanced_executive_summary(overall_score, unique_observations)
+    enhanced_summary = get_enhanced_executive_summary(
+        overall_score, unique_observations
+    )
 
     # Generate severity blocks
-    severity_blocks = generate_severity_blocks(aggregated_scenarios, unique_observations)
+    severity_blocks = generate_severity_blocks(
+        aggregated_scenarios, unique_observations
+    )
 
     # Generate executive summary cards
-    exec_cards = generate_executive_summary_cards(overall_score, enhanced_summary, platform_str)
+    exec_cards = generate_executive_summary_cards(
+        overall_score, enhanced_summary, platform_str
+    )
 
     # Generate professional HTML table with severity indicators
     rows_html = ""
     for scenario in aggregated_scenarios:
-        severity = get_severity_from_score(scenario['score'])
-        score_color = severity['color']
-        score_class = severity['class']
-        severity_icon = severity['icon']
+        severity = get_severity_from_score(scenario["score"])
+        score_color = severity["color"]
+        score_class = severity["class"]
+        severity_icon = severity["icon"]
 
-        traces_text = scenario['traces'] if scenario['traces'] else 'No traces'
-        obs_text = '<br>'.join(scenario['observations']) if scenario['observations'] else 'No observations'
+        traces_text = scenario["traces"] if scenario["traces"] else "No traces"
+        obs_text = (
+            "<br>".join(scenario["observations"])
+            if scenario["observations"]
+            else "No observations"
+        )
 
         rows_html += f"""
         <tr class="hover:bg-blue-50 transition-colors">
@@ -382,13 +456,13 @@ def generate_html_report(result, url: str, session_name: str) -> str:
         </tr>"""
 
     # Prepare chart data
-    chart_labels = [s['name'] for s in aggregated_scenarios]
-    chart_scores = [s['score'] for s in aggregated_scenarios]
-    chart_load_times = [s['load_time'] for s in aggregated_scenarios]
-    chart_memory = [s['memory'] for s in aggregated_scenarios]
-    
+    chart_labels = [s["name"] for s in aggregated_scenarios]
+    chart_scores = [s["score"] for s in aggregated_scenarios]
+    chart_load_times = [s["load_time"] for s in aggregated_scenarios]
+    chart_memory = [s["memory"] for s in aggregated_scenarios]
+
     # Mock comparison scores (for demonstration)
-    comparison_scores = [score * 0.9 for score in chart_scores]  # 10% lower than current
+    comparison_scores = chart_scores  # 10% lower than current
 
     # Create radar chart data for multi-dimensional analysis
     radar_data = create_radar_chart_data(aggregated_scenarios)
@@ -397,26 +471,35 @@ def generate_html_report(result, url: str, session_name: str) -> str:
     statistical_summary = generate_statistical_summary(aggregated_scenarios)
 
     # Mock resource breakdown data for donut chart
-    resource_breakdown = [
-        {'name': 'JavaScript', 'value': 450, 'percentage': 45},
-        {'name': 'CSS', 'value': 120, 'percentage': 12},
-        {'name': 'Images', 'value': 800, 'percentage': 80},
-        {'name': 'Fonts', 'value': 150, 'percentage': 15},
-        {'name': 'HTML', 'value': 50, 'percentage': 5},
-        {'name': 'Other', 'value': 30, 'percentage': 3}
-    ]
+    first_scenario = aggregated_scenarios[0] if aggregated_scenarios else {}
+    real_breakdown = first_scenario.get("resource_breakdown", {})
+    if real_breakdown:
+        total_size = sum(real_breakdown.values())
+        resource_breakdown = [
+            {
+                "name": k.title(),
+                "value": v,
+                "percentage": (v / total_size * 100) if total_size > 0 else 0,
+            }
+            for k, v in real_breakdown.items()
+        ]
+    else:
+        resource_breakdown = []
 
     # Mock memory timeline data
-    memory_timeline = [
-        {'time': 0, 'used_memory': 12.5, 'total_memory': 50},
-        {'time': 500, 'used_memory': 25.3, 'total_memory': 50},
-        {'time': 1000, 'used_memory': 38.7, 'total_memory': 50},
-        {'time': 1500, 'used_memory': 45.2, 'total_memory': 50},
-        {'time': 2000, 'used_memory': 42.1, 'total_memory': 50},
-        {'time': 2500, 'used_memory': 38.9, 'total_memory': 50},
-        {'time': 3000, 'used_memory': 35.4, 'total_memory': 50}
-    ]
-
+    real_samples = first_scenario.get("memory_samples", [])
+    if real_samples:
+        start_ts = real_samples[0]["timestamp"]
+        memory_timeline = [
+            {
+                "time": int(s["timestamp"] - start_ts),
+                "used_memory": s["heap_used_mb"],
+                "total_memory": s.get("heap_total_mb", s["heap_used_mb"] * 1.2),
+            }
+            for s in real_samples
+        ]
+    else:
+        memory_timeline = []
 
     # HTML content (same as CLI)
 
@@ -1549,11 +1632,11 @@ def generate_html_report(result, url: str, session_name: str) -> str:
 
 def get_unique_observations(result) -> List[str]:
     """Get unique observations using CLI logic."""
-    rows = getattr(result.performance_matrix, 'rows', []) or []
+    rows = getattr(result.performance_matrix, "rows", []) or []
     unique_obs = []
 
     for row in rows:
-        for o in (getattr(row, 'key_observations', None) or []):
+        for o in getattr(row, "key_observations", None) or []:
             if o and o not in unique_obs:
                 unique_obs.append(o)
 
@@ -1564,48 +1647,48 @@ def get_severity_from_score(score: float) -> Dict[str, str]:
     """Get severity configuration based on performance score."""
     if score >= 90:
         return {
-            'level': 'Excellent',
-            'color': '#16a34a',
-            'bg': '#dcfce7',
-            'text': '#15803d',
-            'class': 'bg-green-100 text-green-800',
-            'icon': '🟢'
+            "level": "Excellent",
+            "color": "#16a34a",
+            "bg": "#dcfce7",
+            "text": "#15803d",
+            "class": "bg-green-100 text-green-800",
+            "icon": "🟢",
         }
     elif score >= 80:
         return {
-            'level': 'Good',
-            'color': '#2563eb',
-            'bg': '#dbeafe',
-            'text': '#1e40af',
-            'class': 'bg-blue-100 text-blue-800',
-            'icon': '🔵'
+            "level": "Good",
+            "color": "#2563eb",
+            "bg": "#dbeafe",
+            "text": "#1e40af",
+            "class": "bg-blue-100 text-blue-800",
+            "icon": "🔵",
         }
     elif score >= 70:
         return {
-            'level': 'Needs Improvement',
-            'color': '#f59e0b',
-            'bg': '#fef3c7',
-            'text': '#b45309',
-            'class': 'bg-yellow-100 text-yellow-800',
-            'icon': '🟡'
+            "level": "Needs Improvement",
+            "color": "#f59e0b",
+            "bg": "#fef3c7",
+            "text": "#b45309",
+            "class": "bg-yellow-100 text-yellow-800",
+            "icon": "🟡",
         }
     else:
         return {
-            'level': 'Critical',
-            'color': '#dc2626',
-            'bg': '#fee2e2',
-            'text': '#991b1b',
-            'class': 'bg-red-100 text-red-800',
-            'icon': '🔴'
+            "level": "Critical",
+            "color": "#dc2626",
+            "bg": "#fee2e2",
+            "text": "#991b1b",
+            "class": "bg-red-100 text-red-800",
+            "icon": "🔴",
         }
 
 
 def generate_severity_blocks(scenarios: List[Dict], observations: List[str]) -> str:
     """Generate severity blocks for executive summary."""
-    excellent_count = sum(1 for s in scenarios if s['score'] >= 90)
-    good_count = sum(1 for s in scenarios if 80 <= s['score'] < 90)
-    needs_improvement_count = sum(1 for s in scenarios if 70 <= s['score'] < 80)
-    critical_count = sum(1 for s in scenarios if s['score'] < 70)
+    excellent_count = sum(1 for s in scenarios if s["score"] >= 90)
+    good_count = sum(1 for s in scenarios if 80 <= s["score"] < 90)
+    needs_improvement_count = sum(1 for s in scenarios if 70 <= s["score"] < 80)
+    critical_count = sum(1 for s in scenarios if s["score"] < 70)
 
     return f"""
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -1641,10 +1724,12 @@ def generate_severity_blocks(scenarios: List[Dict], observations: List[str]) -> 
     """
 
 
-def generate_executive_summary_cards(overall_score: float, summary: Dict, platform: str) -> str:
+def generate_executive_summary_cards(
+    overall_score: float, summary: Dict, platform: str
+) -> str:
     """Generate professional executive summary cards."""
     severity = get_severity_from_score(overall_score)
-    avg_score = statistics.mean([s['score'] for s in []]) if False else overall_score
+    avg_score = statistics.mean([s["score"] for s in []]) if False else overall_score
 
     return f"""
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -1710,35 +1795,42 @@ def create_radar_chart_data(scenarios: List[Dict]) -> List[Dict]:
 
     # Normalize scores to radar chart dimensions
     dimensions = [
-        'Load Time',
-        'Memory Usage',
-        'Performance',
-        'Consistency',
-        'Optimization'
+        "Load Time",
+        "Memory Usage",
+        "Performance",
+        "Consistency",
+        "Optimization",
     ]
 
     # Calculate normalized values (0-100)
-    max_load_time = max(s['load_time'] for s in scenarios) if scenarios else 1
-    max_memory = max(s['memory'] for s in scenarios) if scenarios else 1
+    max_load_time = max(s["load_time"] for s in scenarios) if scenarios else 1
+    max_memory = max(s["memory"] for s in scenarios) if scenarios else 1
 
     radar_data = []
     for i, scenario in enumerate(scenarios):
-        radar_data.append({
-            'subject': dimensions[i % len(dimensions)],
-            'value': scenario['score'],
-            'target': 85  # Target benchmark
-        })
+        radar_data.append(
+            {
+                "subject": dimensions[i % len(dimensions)],
+                "value": scenario["score"],
+                "target": 85,  # Target benchmark
+            }
+        )
 
     return radar_data
 
 
-def save_reports(result, url: str, session_name: str, output_dir: str,
-                 generate_executive: bool = False,
-                 generate_academic: bool = False,
-                 export_formats: Optional[List[str]] = None) -> Dict[str, str]:
+def save_reports(
+    result,
+    url: str,
+    session_name: str,
+    output_dir: str,
+    generate_executive: bool = False,
+    generate_academic: bool = False,
+    export_formats: Optional[List[str]] = None,
+) -> Dict[str, str]:
     """
     Save reports using CLI logic.
-    
+
     Args:
         result: Scan result
         url: URL that was scanned
@@ -1747,48 +1839,59 @@ def save_reports(result, url: str, session_name: str, output_dir: str,
         generate_executive: Whether to generate executive dashboard
         generate_academic: Whether to generate academic report
         export_formats: List of additional export formats ('excel', 'csv', 'markdown')
-        
+
     Returns:
         Dictionary mapping report type to file path
     """
     reports_dir = Path(output_dir)
     reports_dir.mkdir(exist_ok=True)
-    
+
     saved_reports = {}
-    
+
     # Generate and save HTML report
     html_content = generate_html_report(result, url, session_name)
     html_report_path = reports_dir / f"{session_name}.html"
-    with open(html_report_path, 'w', encoding='utf-8') as f:
+    with open(html_report_path, "w", encoding="utf-8") as f:
         f.write(html_content)
-    saved_reports['html'] = str(html_report_path)
-    
+    saved_reports["html"] = str(html_report_path)
+
+    # Generate and save PDF report
+    try:
+        from .reporting.pdf_generator import PDFReportGenerator
+
+        pdf_path = reports_dir / f"{session_name}.pdf"
+        pdf_gen = PDFReportGenerator()
+        pdf_gen.generate(result, url, session_name, str(pdf_path))
+        saved_reports["pdf"] = str(pdf_path)
+    except Exception as e:
+        print(f"Failed to generate PDF: {e}")
+
     # Generate and save JSON report
     json_content = generate_json_report(result, url, session_name)
     json_report_path = reports_dir / f"{session_name}.json"
-    with open(json_report_path, 'w', encoding='utf-8') as f:
+    with open(json_report_path, "w", encoding="utf-8") as f:
         json.dump(json_content, f, indent=2)
-    saved_reports['json'] = str(json_report_path)
-    
+    saved_reports["json"] = str(json_report_path)
+
     # Generate executive dashboard if requested
     if generate_executive:
         exec_path = reports_dir / f"{session_name}_executive_dashboard.html"
         generate_executive_dashboard(result, url, session_name, output_path=exec_path)
-        saved_reports['executive_dashboard'] = str(exec_path)
-    
+        saved_reports["executive_dashboard"] = str(exec_path)
+
     # Generate academic report if requested
     if generate_academic:
         academic_path = reports_dir / f"{session_name}_academic_report.html"
         generate_academic_report(result, url, session_name, output_path=academic_path)
-        saved_reports['academic_report'] = str(academic_path)
-    
+        saved_reports["academic_report"] = str(academic_path)
+
     # Export to additional formats
     if export_formats:
         format_paths = export_all_formats(result, url, reports_dir, session_name)
         for fmt, path in format_paths.items():
             if path:
-                saved_reports[f'export_{fmt}'] = str(path)
-    
+                saved_reports[f"export_{fmt}"] = str(path)
+
     return saved_reports
 
 
@@ -1797,13 +1900,23 @@ def generate_session_report(session, session_name: str) -> Dict[str, Any]:
     scans = []
     overall_scores = []
 
-    for r in getattr(session, 'scan_results', []) or getattr(session, 'scan_results', []):
+    for r in getattr(session, "scan_results", []) or getattr(
+        session, "scan_results", []
+    ):
         # r may be a ScanResult or a dict
         try:
-            scan_id = getattr(r, 'scan_id', None) or r.get('scan_id')
-            url = getattr(r, 'url', None) or r.get('url')
-            overall = getattr(r.performance_matrix, 'overall_score', None) if hasattr(r, 'performance_matrix') else r.get('overall_score')
-            aggregated = get_aggregated_scenarios(r) if hasattr(r, 'performance_matrix') else r.get('scenarios')
+            scan_id = getattr(r, "scan_id", None) or r.get("scan_id")
+            url = getattr(r, "url", None) or r.get("url")
+            overall = (
+                getattr(r.performance_matrix, "overall_score", None)
+                if hasattr(r, "performance_matrix")
+                else r.get("overall_score")
+            )
+            aggregated = (
+                get_aggregated_scenarios(r)
+                if hasattr(r, "performance_matrix")
+                else r.get("scenarios")
+            )
         except Exception:
             scan_id = None
             url = None
@@ -1812,20 +1925,24 @@ def generate_session_report(session, session_name: str) -> Dict[str, Any]:
 
         overall_scores.append(overall or 0)
 
-        scans.append({
-            'scan_id': scan_id,
-            'url': url,
-            'overall_score': overall or 0,
-            'aggregated_scenarios': aggregated or [],
-        })
+        scans.append(
+            {
+                "scan_id": scan_id,
+                "url": url,
+                "overall_score": overall or 0,
+                "aggregated_scenarios": aggregated or [],
+            }
+        )
 
-    session_overall = (sum(overall_scores) / len(overall_scores)) if overall_scores else 0
+    session_overall = (
+        (sum(overall_scores) / len(overall_scores)) if overall_scores else 0
+    )
 
     return {
-        'session_name': session_name,
-        'generated_at': datetime.now().isoformat(),
-        'scans': scans,
-        'session_overall_score': session_overall,
+        "session_name": session_name,
+        "generated_at": datetime.now().isoformat(),
+        "scans": scans,
+        "session_overall_score": session_overall,
     }
 
 
@@ -1838,15 +1955,15 @@ def save_session_reports(session, session_name: str, output_dir: str) -> Dict[st
     json_content = generate_session_report(session, norm_name)
 
     json_report_path = reports_dir / f"{norm_name}_session.json"
-    with open(json_report_path, 'w', encoding='utf-8') as f:
+    with open(json_report_path, "w", encoding="utf-8") as f:
         json.dump(json_content, f, indent=2)
 
     # Simple HTML representation
-    rows_html = ''
-    for scan in json_content['scans']:
+    rows_html = ""
+    for scan in json_content["scans"]:
         rows_html += f"<h3>{scan.get('url') or scan.get('scan_id')}</h3>"
         rows_html += "<ul>"
-        for s in scan.get('aggregated_scenarios', []):
+        for s in scan.get("aggregated_scenarios", []):
             rows_html += f"<li>{s.get('name')}: score={s.get('score',0):.1f}, load={s.get('load_time',0):.2f}s</li>"
         rows_html += "</ul>"
 
@@ -1864,46 +1981,53 @@ def save_session_reports(session, session_name: str, output_dir: str) -> Dict[st
     """
 
     html_report_path = reports_dir / f"{norm_name}_session.html"
-    with open(html_report_path, 'w', encoding='utf-8') as f:
+    with open(html_report_path, "w", encoding="utf-8") as f:
         f.write(html_content)
 
     return {
-        'html': str(html_report_path),
-        'json': str(json_report_path),
+        "html": str(html_report_path),
+        "json": str(json_report_path),
     }
 
 
 def get_console_display_data(result, url: str, session_name: str) -> Dict[str, Any]:
     """Get console display data using CLI logic."""
-    overall_score = getattr(result.performance_matrix, 'overall_score', 0)
-    platform = getattr(result, 'platform', 'generic')
-    platform_str = platform.value if hasattr(platform, 'value') else str(platform)
-    
+    overall_score = getattr(result.performance_matrix, "overall_score", 0)
+    platform = getattr(result, "platform", "generic")
+    platform_str = platform.value if hasattr(platform, "value") else str(platform)
+
     aggregated_scenarios = get_aggregated_scenarios(result)
-    exec_summary = get_enhanced_executive_summary(overall_score, get_unique_observations(result))['summary_line']
-    
+    exec_summary = get_enhanced_executive_summary(
+        overall_score, get_unique_observations(result)
+    )["summary_line"]
+
     return {
         "overview": {
             "overall_score": overall_score,
             "platform": platform_str,
             "scenarios_tested": len(aggregated_scenarios),
-            "generated": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            "executive_summary": exec_summary
+            "generated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "executive_summary": exec_summary,
         },
         "scenarios": aggregated_scenarios,
-        "unique_observations": get_unique_observations(result)
+        "unique_observations": get_unique_observations(result),
     }
 
 
 def calculate_confidence_interval(data, confidence=0.95):
     """Calculate confidence interval for a dataset."""
     if len(data) < 2:
-        return {'mean': data[0] if data else 0, 'margin_error': 0, 'lower_bound': data[0] if data else 0, 'upper_bound': data[0] if data else 0}
-    
+        return {
+            "mean": data[0] if data else 0,
+            "margin_error": 0,
+            "lower_bound": data[0] if data else 0,
+            "upper_bound": data[0] if data else 0,
+        }
+
     n = len(data)
     mean = statistics.mean(data)
     std_err = statistics.stdev(data) / math.sqrt(n)
-    
+
     # Use t-distribution for small samples
     if n < 30:
         if stats is not None:
@@ -1916,81 +2040,88 @@ def calculate_confidence_interval(data, confidence=0.95):
             t_critical = stats.norm.ppf((1 + confidence) / 2)
         else:
             t_critical = 1.96  # 95% confidence approximation
-    
+
     margin_error = t_critical * std_err
     lower_bound = mean - margin_error
     upper_bound = mean + margin_error
-    
+
     return {
-        'mean': mean,
-        'margin_error': margin_error,
-        'lower_bound': lower_bound,
-        'upper_bound': upper_bound,
-        'confidence_level': confidence
+        "mean": mean,
+        "margin_error": margin_error,
+        "lower_bound": lower_bound,
+        "upper_bound": upper_bound,
+        "confidence_level": confidence,
     }
 
 
-def detect_outliers(data, method='iqr'):
+def detect_outliers(data, method="iqr"):
     """Detect outliers in a dataset using IQR method."""
     if len(data) < 2:
-        return {'outliers': [], 'outlier_indices': [], 'clean_data': data, 'q1': data[0] if data else 0, 'q3': data[0] if data else 0, 'iqr': 0, 'bounds': {'lower': 0, 'upper': 0}}
-    
+        return {
+            "outliers": [],
+            "outlier_indices": [],
+            "clean_data": data,
+            "q1": data[0] if data else 0,
+            "q3": data[0] if data else 0,
+            "iqr": 0,
+            "bounds": {"lower": 0, "upper": 0},
+        }
+
     sorted_data = sorted(data)
     n = len(sorted_data)
-    
+
     # Calculate quartiles
     q1_idx = int(0.25 * (n - 1))
     q3_idx = int(0.75 * (n - 1))
     q1 = sorted_data[q1_idx]
     q3 = sorted_data[q3_idx]
-    
+
     iqr = q3 - q1
     lower_bound = q1 - 1.5 * iqr
     upper_bound = q3 + 1.5 * iqr
-    
+
     outliers = []
     outlier_indices = []
     clean_data = []
-    
+
     for i, value in enumerate(data):
         if value < lower_bound or value > upper_bound:
             outliers.append(value)
             outlier_indices.append(i)
         else:
             clean_data.append(value)
-    
+
     return {
-        'outliers': outliers,
-        'outlier_indices': outlier_indices,
-        'clean_data': clean_data,
-        'q1': q1,
-        'q3': q3,
-        'iqr': iqr,
-        'bounds': {'lower': lower_bound, 'upper': upper_bound}
+        "outliers": outliers,
+        "outlier_indices": outlier_indices,
+        "clean_data": clean_data,
+        "q1": q1,
+        "q3": q3,
+        "iqr": iqr,
+        "bounds": {"lower": lower_bound, "upper": upper_bound},
     }
 
 
 def calculate_correlation_matrix(data_dict):
     """Calculate correlation matrix for multiple metrics."""
-    import numpy as np
     import pandas as pd
-    
+
     # Convert to DataFrame for easier correlation calculation
     df = pd.DataFrame(data_dict)
-    
+
     # Calculate Pearson correlation coefficients
-    correlation_matrix = df.corr(method='pearson')
-    
+    correlation_matrix = df.corr(method="pearson")
+
     # Convert to dictionary format
     corr_dict = {}
     for col1 in correlation_matrix.columns:
         corr_dict[col1] = {}
         for col2 in correlation_matrix.columns:
             corr_dict[col1][col2] = {
-                'correlation': correlation_matrix.loc[col1, col2],
-                'strength': interpret_correlation(correlation_matrix.loc[col1, col2])
+                "correlation": correlation_matrix.loc[col1, col2],
+                "strength": interpret_correlation(correlation_matrix.loc[col1, col2]),
             }
-    
+
     return corr_dict
 
 
@@ -1998,169 +2129,169 @@ def interpret_correlation(correlation_value):
     """Interpret correlation strength."""
     abs_corr = abs(correlation_value)
     if abs_corr > 0.7:
-        return 'strong'
+        return "strong"
     elif abs_corr > 0.4:
-        return 'moderate'
+        return "moderate"
     else:
-        return 'weak'
+        return "weak"
 
 
 def calculate_effect_size(data1, data2):
     """Calculate Cohen's d effect size between two datasets."""
     mean1, mean2 = statistics.mean(data1), statistics.mean(data2)
-    std1, std2 = statistics.stdev(data1) if len(data1) > 1 else 0, statistics.stdev(data2) if len(data2) > 1 else 0
-    
+    std1, std2 = statistics.stdev(data1) if len(data1) > 1 else 0, (
+        statistics.stdev(data2) if len(data2) > 1 else 0
+    )
+
     # Pooled standard deviation
     n1, n2 = len(data1), len(data2)
     pooled_std = math.sqrt(((n1 - 1) * std1**2 + (n2 - 1) * std2**2) / (n1 + n2 - 2))
-    
+
     if pooled_std == 0:
         return 0
-    
+
     cohens_d = (mean1 - mean2) / pooled_std
-    
+
     # Interpret effect size
     if abs(cohens_d) < 0.2:
-        interpretation = 'negligible'
+        interpretation = "negligible"
     elif abs(cohens_d) < 0.5:
-        interpretation = 'small'
+        interpretation = "small"
     elif abs(cohens_d) < 0.8:
-        interpretation = 'medium'
+        interpretation = "medium"
     elif abs(cohens_d) < 1.2:
-        interpretation = 'large'
+        interpretation = "large"
     else:
-        interpretation = 'very_large'
-    
+        interpretation = "very_large"
+
     return {
-        'effect_size': cohens_d,
-        'interpretation': interpretation,
-        'direction': 'positive' if cohens_d > 0 else 'negative' if cohens_d < 0 else 'none'
+        "effect_size": cohens_d,
+        "interpretation": interpretation,
+        "direction": (
+            "positive" if cohens_d > 0 else "negative" if cohens_d < 0 else "none"
+        ),
     }
 
 
-def perform_hypothesis_test(data1, data2, test_type='paired_t'):
+def perform_hypothesis_test(data1, data2, test_type="paired_t"):
     """Perform hypothesis testing between two datasets."""
     if stats is None:
         # Fallback to basic comparison if scipy not available
         mean1, mean2 = statistics.mean(data1), statistics.mean(data2)
         return {
-            'test_type': test_type,
-            't_statistic': mean1 - mean2,
-            'p_value': 0.05,  # Default p-value
-            'significant': abs(mean1 - mean2) > 0.1,
-            'interpretation': 'Basic comparison (scipy not available)'
+            "test_type": test_type,
+            "t_statistic": mean1 - mean2,
+            "p_value": 0.05,  # Default p-value
+            "significant": abs(mean1 - mean2) > 0.1,
+            "interpretation": "Basic comparison (scipy not available)",
         }
-    
-    if test_type == 'paired_t':
+
+    if test_type == "paired_t":
         if len(data1) != len(data2):
             raise ValueError("Paired t-test requires equal length datasets")
-        
+
         # Calculate differences
         differences = [a - b for a, b in zip(data1, data2)]
-        
+
         # Perform paired t-test
         t_stat, p_value = stats.ttest_rel(data1, data2)
-        
-    elif test_type == 'independent_t':
+
+    elif test_type == "independent_t":
         t_stat, p_value = stats.ttest_ind(data1, data2)
-    
+
     # Interpret p-value
     if p_value < 0.01:
-        significance = 'highly_significant'
+        significance = "highly_significant"
     elif p_value < 0.05:
-        significance = 'significant'
+        significance = "significant"
     elif p_value < 0.10:
-        significance = 'marginally_significant'
+        significance = "marginally_significant"
     else:
-        significance = 'not_significant'
-    
+        significance = "not_significant"
+
     return {
-        'test_type': test_type,
-        't_statistic': t_stat,
-        'p_value': p_value,
-        'significance': significance,
-        'alpha': 0.05
+        "test_type": test_type,
+        "t_statistic": t_stat,
+        "p_value": p_value,
+        "significance": significance,
+        "alpha": 0.05,
     }
 
 
 def generate_statistical_summary(aggregated_scenarios):
     """Generate comprehensive statistical summary for all scenarios."""
     statistical_summary = {}
-    
+
     # Extract metrics for analysis
-    scores = [s['score'] for s in aggregated_scenarios]
-    load_times = [s['load_time'] for s in aggregated_scenarios]
-    memory_usage = [s['memory'] for s in aggregated_scenarios]
-    
+    scores = [s["score"] for s in aggregated_scenarios]
+    load_times = [s["load_time"] for s in aggregated_scenarios]
+    memory_usage = [s["memory"] for s in aggregated_scenarios]
+
     # Confidence intervals
-    statistical_summary['confidence_intervals'] = {
-        'score': calculate_confidence_interval(scores),
-        'load_time': calculate_confidence_interval(load_times),
-        'memory': calculate_confidence_interval(memory_usage)
+    statistical_summary["confidence_intervals"] = {
+        "score": calculate_confidence_interval(scores),
+        "load_time": calculate_confidence_interval(load_times),
+        "memory": calculate_confidence_interval(memory_usage),
     }
-    
+
     # Outlier detection
     try:
-        statistical_summary['outliers'] = {
-            'score': detect_outliers(scores),
-            'load_time': detect_outliers(load_times),
-            'memory': detect_outliers(memory_usage)
+        statistical_summary["outliers"] = {
+            "score": detect_outliers(scores),
+            "load_time": detect_outliers(load_times),
+            "memory": detect_outliers(memory_usage),
         }
     except Exception as e:
-        statistical_summary['outliers'] = {
-            'score': {'outliers': [], 'q1': 0, 'q3': 0, 'iqr': 0},
-            'load_time': {'outliers': [], 'q1': 0, 'q3': 0, 'iqr': 0},
-            'memory': {'outliers': [], 'q1': 0, 'q3': 0, 'iqr': 0}
+        statistical_summary["outliers"] = {
+            "score": {"outliers": [], "q1": 0, "q3": 0, "iqr": 0},
+            "load_time": {"outliers": [], "q1": 0, "q3": 0, "iqr": 0},
+            "memory": {"outliers": [], "q1": 0, "q3": 0, "iqr": 0},
         }
-    
+
     # Correlation analysis
-    metrics_data = {
-        'score': scores,
-        'load_time': load_times,
-        'memory': memory_usage
-    }
-    
+    metrics_data = {"score": scores, "load_time": load_times, "memory": memory_usage}
+
     # For single scenario, add slight variations to enable correlation analysis
     if len(scores) == 1:
         # Create slight variations for demonstration purposes
         base_score = scores[0]
         base_load = load_times[0]
         base_memory = memory_usage[0]
-        
+
         # Add small variations (±5%) to enable correlation calculation
         scores = [base_score * 0.95, base_score, base_score * 1.05]
         load_times = [base_load * 0.95, base_load, base_load * 1.05]
         memory_usage = [base_memory * 0.95, base_memory, base_memory * 1.05]
-        
+
         # Update metrics_data with the modified arrays
         metrics_data = {
-            'score': scores,
-            'load_time': load_times,
-            'memory': memory_usage
+            "score": scores,
+            "load_time": load_times,
+            "memory": memory_usage,
         }
-    
-    statistical_summary['correlations'] = calculate_correlation_matrix(metrics_data)
-    
+
+    statistical_summary["correlations"] = calculate_correlation_matrix(metrics_data)
+
     # Variability analysis
-    statistical_summary['variability'] = {}
+    statistical_summary["variability"] = {}
     for metric_name, values in metrics_data.items():
         if len(values) > 1:
             mean_val = statistics.mean(values)
             std_val = statistics.stdev(values)
             cv = (std_val / mean_val) * 100 if mean_val != 0 else 0
-            
+
             if cv < 5:
-                consistency = 'high'
+                consistency = "high"
             elif cv < 15:
-                consistency = 'moderate'
+                consistency = "moderate"
             else:
-                consistency = 'low'
-            
-            statistical_summary['variability'][metric_name] = {
-                'mean': mean_val,
-                'std_dev': std_val,
-                'coefficient_of_variation': cv,
-                'consistency': consistency
+                consistency = "low"
+
+            statistical_summary["variability"][metric_name] = {
+                "mean": mean_val,
+                "std_dev": std_val,
+                "coefficient_of_variation": cv,
+                "consistency": consistency,
             }
-    
+
     return statistical_summary
