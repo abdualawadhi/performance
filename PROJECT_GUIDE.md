@@ -89,7 +89,7 @@ The scanner evaluates performance across a multi-dimensional matrix:
 
 ## ⚠️ Limits
 
-- **Synthetic Testing**: While highly accurate, it remains a synthetic test and may not perfectly capture 100% of real-user environment variability.
+- **Automated Testing**: While highly accurate, it remains a lab-based test and may not perfectly capture 100% of real-user environment variability.
 - **Resource Intensive**: Running multiple scenarios across multiple devices/networks can be CPU and memory-intensive on the host machine.
 - **Authentication**: Complex multi-factor authentication (MFA) flows may require custom scripting.
 
@@ -100,5 +100,5 @@ The scanner evaluates performance across a multi-dimensional matrix:
 - **AI-Powered Recommendations**: Using LLMs to provide even more specific code-level optimization advice based on traces.
 - **CI/CD Plugins**: Native plugins for GitHub Actions, GitLab CI, and Jenkins.
 - **Historical Trending**: Built-in database support for tracking performance over time and detecting regressions.
-- **Synthetic User Journeys**: Drag-and-drop builder for complex multi-page user scenarios.
-- **Real User Monitoring (RUM) Integration**: Correlate synthetic results with actual user data.
+- **Complex User Journeys**: Drag-and-drop builder for multi-page scenarios.
+- **Real User Monitoring (RUM) Integration**: Correlate scanner results with actual user data.

@@ -154,12 +154,32 @@ class NetworkMonitor:
         try:
             timestamp = datetime.now(timezone.utc).timestamp() * 1000
 
-            # Find matching request
+            # Find matching request using Playwright's built-in link
             matching_request = None
             for req in self.requests:
-                if req["url"] == response.url:
+                # Use URL and some timing context to match, as we don't have a unique ID here
+                # but Playwright's response object is linked to its request
+                if req["url"] == response.url and not any(
+                    res.get("url") == response.url
+                    for res in self.responses
+                    if res.get("timestamp", 0) > req["timestamp"]
+                ):
                     matching_request = req
                     break
+
+            if not matching_request:
+                # Fallback to direct request object if available (Playwright >= 1.12)
+                try:
+                    request = response.request
+                    for req in self.requests:
+                        if (
+                            req["url"] == request.url
+                            and abs(req["timestamp"] - timestamp) < 60000
+                        ):
+                            matching_request = req
+                            break
+                except:
+                    pass
 
             if not matching_request:
                 return
@@ -185,7 +205,9 @@ class NetworkMonitor:
             transfer_size = content_length
             if response.headers.get("content-encoding"):
                 # Rough estimate for compressed content
-                transfer_size = int(content_length * 0.7)  # Assume ~30% compression
+                # Use actual transfer size from encodedDataLength if available
+                # Otherwise use content-length as-is (no assumption about compression)
+                transfer_size = content_length
 
             self.total_transfer_size_bytes += transfer_size
             self.total_resource_size_bytes += content_length
@@ -391,10 +413,10 @@ class NetworkMonitor:
                 "third_party_requests": third_party_count,
                 "third_party_size_kb": third_party_size_bytes / 1024,
                 "third_party_percentage": (
-                    third_party_count / self.total_requests * 100
-                )
-                if self.total_requests > 0
-                else 0,
+                    (third_party_count / self.total_requests * 100)
+                    if self.total_requests > 0
+                    else 0
+                ),
                 "domains": third_party_domains[:10],  # Top 10 domains
                 "unique_domains": len(self.domains),
                 "recommendations": self._generate_third_party_recommendations(
@@ -544,12 +566,14 @@ class NetworkMonitor:
                     "total_requests": metrics.total_requests,
                     "failed_requests": metrics.failed_requests,
                     "success_rate": (
-                        (metrics.total_requests - metrics.failed_requests)
-                        / metrics.total_requests
-                        * 100
-                    )
-                    if metrics.total_requests > 0
-                    else 0,
+                        (
+                            (metrics.total_requests - metrics.failed_requests)
+                            / metrics.total_requests
+                            * 100
+                        )
+                        if metrics.total_requests > 0
+                        else 0
+                    ),
                     "total_size_kb": metrics.total_transfer_size_kb,
                     "average_response_time_ms": metrics.avg_response_time_ms,
                     "slowest_request_ms": metrics.slowest_request_ms,
@@ -594,9 +618,9 @@ class NetworkMonitor:
                     "issue": "Large Page Size",
                     "description": f"Total page size is {metrics.total_transfer_size_kb:.0f}KB",
                     "suggestion": "Optimize images, minify assets, and implement lazy loading",
-                    "priority": "high"
-                    if metrics.total_transfer_size_kb > 5120
-                    else "medium",
+                    "priority": (
+                        "high" if metrics.total_transfer_size_kb > 5120 else "medium"
+                    ),
                 }
             )
 
@@ -629,9 +653,9 @@ class NetworkMonitor:
                     "issue": "Slow Response Times",
                     "description": f"Average response time is {metrics.avg_response_time_ms:.0f}ms",
                     "suggestion": "Optimize server performance and use a CDN",
-                    "priority": "high"
-                    if metrics.avg_response_time_ms > 1000
-                    else "medium",
+                    "priority": (
+                        "high" if metrics.avg_response_time_ms > 1000 else "medium"
+                    ),
                 }
             )
 

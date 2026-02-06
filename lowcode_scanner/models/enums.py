@@ -18,6 +18,9 @@ class LowCodePlatform(Enum):
     APPIAN = "appian"
     POWERAPPS = "powerapps"
     SALESFORCE = "salesforce"
+    SHOPIFY = "shopify"
+    WEBFLOW = "webflow"
+    WIX = "wix"
     GENERIC = "generic"
 
     @classmethod
@@ -39,6 +42,12 @@ class LowCodePlatform(Enum):
             return cls.POWERAPPS
         elif "salesforce.com" in url_lower or "force.com" in url_lower:
             return cls.SALESFORCE
+        elif "myshopify.com" in url_lower or "shopify.com" in url_lower:
+            return cls.SHOPIFY
+        elif "webflow.io" in url_lower or "webflow.com" in url_lower:
+            return cls.WEBFLOW
+        elif "wix.com" in url_lower:
+            return cls.WIX
         else:
             return cls.GENERIC
 
@@ -294,6 +303,13 @@ class TracingEvent(Enum):
     BUBBLE_WORKFLOW = "bubbleWorkflow"
     OUTSYSTEMS_SCREEN_LOAD = "outsystemsScreenLoad"
     AIRTABLE_QUERY = "airtableQuery"
+    SHOPIFY_LIQUID_RENDER = "shopifyLiquidRender"
+    WEBFLOW_INTERACTION = "webflowInteraction"
+    WIX_VELO_MODULE = "wixVeloModule"
+    MENDIX_MICROFLOW = "mendixMicroflow"
+    APPIAN_SAIL_REVAL = "appianSailReevaluation"
+    POWERAPPS_EXPRESSION = "powerAppsExpression"
+    SALESFORCE_LWC_RENDER = "salesforceLwcRender"
 
     @property
     def category(self) -> str:
@@ -308,7 +324,18 @@ class TracingEvent(Enum):
             return "network"
         elif any(
             platform in self.value.lower()
-            for platform in ["bubble", "outsystems", "airtable"]
+            for platform in [
+                "bubble",
+                "outsystems",
+                "airtable",
+                "shopify",
+                "webflow",
+                "wix",
+                "mendix",
+                "appian",
+                "powerapps",
+                "salesforce",
+            ]
         ):
             return "platform"
         else:

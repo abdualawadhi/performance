@@ -161,13 +161,10 @@ class MemoryMonitor:
                 }
             """)
 
-            # Convert bytes to MB
-            heap_used_mb = (
-                heap_usage.get("usedSize", 0) + memory_info.get("usedJSHeapSize", 0)
-            ) / (1024 * 1024)
-            heap_total_mb = (
-                heap_usage.get("totalSize", 0) + memory_info.get("totalJSHeapSize", 0)
-            ) / (1024 * 1024)
+            # Convert bytes to MB - use only CDP reported usage to avoid double counting
+            # with performance.memory which reports the same JS heap
+            heap_used_mb = heap_usage.get("usedSize", 0) / (1024 * 1024)
+            heap_total_mb = heap_usage.get("totalSize", 0) / (1024 * 1024)
             heap_limit_mb = memory_info.get("jsHeapSizeLimit", 0) / (1024 * 1024)
 
             # Create memory sample

@@ -287,7 +287,7 @@ class ExecutiveDashboardGenerator:
     
     def _generate_memory_timeline_data(self, result) -> Dict[str, Any]:
         """Generate memory timeline data."""
-        # Generate synthetic timeline data based on scenarios
+        # Generate timeline data based on scenarios
         scenarios = getattr(result.performance_metrics, 'scenarios', {})
         
         labels = []
@@ -300,9 +300,9 @@ class ExecutiveDashboardGenerator:
             dom_nodes.append(scenario.memory_metrics.dom_nodes_count / 100)  # Scale for visualization
         
         if not labels:
-            labels = ["Initial", "Mid", "Peak", "Final"]
-            heap_data = [25, 35, 45, 40]
-            dom_nodes = [20, 25, 30, 28]
+            labels = ["N/A"]
+            heap_data = [0]
+            dom_nodes = [0]
         
         return {
             "labels": labels,
@@ -336,18 +336,15 @@ class ExecutiveDashboardGenerator:
         # Use first row's timing data
         row = rows[0]
         
-        # Create waterfall phases
-        waterfall = [
-            {"name": "DNS", "duration": 45, "color": "#3b82f6", "start": 0},
-            {"name": "TCP", "duration": 89, "color": "#22c55e", "start": 45},
-            {"name": "SSL", "duration": 156, "color": "#eab308", "start": 134},
-            {"name": "TTFB", "duration": 234, "color": "#f97316", "start": 290},
-            {"name": "Download", "duration": 567, "color": "#8b5cf6", "start": 524},
-            {"name": "Processing", "duration": 345, "color": "#ef4444", "start": 1091},
-            {"name": "Rendering", "duration": 289, "color": "#06b6d4", "start": 1436}
-        ]
-        
-        return waterfall
+        # Extract real timing if available, otherwise return empty
+        # This avoids mock data as per latest requirements
+        if hasattr(row, 'network_metrics') and row.network_metrics:
+            # Building a simplified waterfall from network metrics
+            return [
+                {"name": "Total Load", "duration": getattr(row, 'load_time_s', 0) * 1000, "color": "#3b82f6", "start": 0}
+            ]
+            
+        return []
     
     def _generate_comparison_data(self, result, comparison_result) -> Optional[Dict[str, Any]]:
         """Generate before/after comparison data."""
