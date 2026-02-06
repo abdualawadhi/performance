@@ -1,0 +1,420 @@
+{
+  "report_metadata": {
+    "scan_id": "demo_comprehensive_report",
+    "url": "https://example-lowcode-app.com",
+    "generated_at": "2026-02-03T01:21:24.570119",
+    "report_version": "2.0",
+    "analysis_engine": "LowCode Performance Scanner",
+    "template_used": "comprehensive"
+  },
+  "executive_summary": {
+    "overall_performance_score": 85.5,
+    "core_web_vitals_status": {
+      "lcp": {
+        "value": 2500,
+        "status": "needs-improvement"
+      },
+      "fid": {
+        "value": 50.0,
+        "status": "good"
+      },
+      "cls": {
+        "value": 0.12,
+        "status": "needs-improvement"
+      }
+    },
+    "key_findings": [
+      "Performance consistency score of 85.0% indicates good consistency across test runs",
+      "Resource efficiency ratio of 36.00 requests per MB suggests moderate resource usage"
+    ],
+    "critical_issues": []
+  },
+  "detailed_analysis": {
+    "issues": [],
+    "insights": [
+      {
+        "category": "Consistency",
+        "title": "Performance Consistency Analysis",
+        "description": "Performance consistency score of 85.0% indicates good consistency across test runs",
+        "confidence_level": 0.85
+      },
+      {
+        "category": "Efficiency",
+        "title": "Resource Efficiency",
+        "description": "Resource efficiency ratio of 36.00 requests per MB suggests moderate resource usage",
+        "confidence_level": 0.9
+      }
+    ],
+    "bottlenecks": [],
+    "optimization_opportunities": [
+      {
+        "category": "Image Optimization",
+        "potential_savings": "30-50%",
+        "effort": "Low",
+        "description": "Optimize images for web delivery",
+        "actions": [
+          "Convert images to WebP format",
+          "Implement responsive images",
+          "Add image lazy loading",
+          "Optimize image compression"
+        ],
+        "impact_score": 8.5
+      },
+      {
+        "category": "JavaScript Optimization",
+        "potential_savings": "20-30%",
+        "effort": "Medium",
+        "description": "Reduce JavaScript bundle size and execution time",
+        "actions": [
+          "Implement code splitting",
+          "Remove unused JavaScript",
+          "Use tree shaking",
+          "Optimize dependencies"
+        ],
+        "impact_score": 7.5
+      },
+      {
+        "category": "Caching Strategy",
+        "potential_savings": "25-40%",
+        "effort": "Low",
+        "description": "Improve caching strategy for faster repeat visits",
+        "actions": [
+          "Implement browser caching",
+          "Use service workers",
+          "Optimize cache headers",
+          "Implement CDN caching"
+        ],
+        "impact_score": 8.0
+      }
+    ],
+    "technical_score_breakdown": {
+      "loading_performance": 100.0,
+      "interactivity": 100.0,
+      "visual_stability": 50,
+      "resource_efficiency": 100.0,
+      "network_optimization": 50,
+      "memory_management": 100
+    },
+    "performance_trends": {
+      "trend_direction": "stable",
+      "confidence_level": 0.75,
+      "trend_analysis": {
+        "performance_score": {
+          "direction": "stable",
+          "confidence": 0.8
+        },
+        "lcp": {
+          "direction": "improving",
+          "confidence": 0.7
+        },
+        "memory_usage": {
+          "direction": "stable",
+          "confidence": 0.9
+        }
+      }
+    },
+    "resource_analysis": {
+      "resource_timing": {
+        "dns_lookup": 45,
+        "tcp_connection": 89,
+        "ssl_handshake": 156,
+        "server_response": 234,
+        "content_download": 567
+      },
+      "resource_breakdown": {
+        "html": {
+          "count": 1,
+          "size": 45,
+          "time": 120
+        },
+        "css": {
+          "count": 3,
+          "size": 120,
+          "time": 89
+        },
+        "javascript": {
+          "count": 8,
+          "size": 380,
+          "time": 234
+        },
+        "images": {
+          "count": 25,
+          "size": 650,
+          "time": 567
+        },
+        "fonts": {
+          "count": 4,
+          "size": 85,
+          "time": 123
+        }
+      },
+      "optimization_potential": {
+        "images": 30,
+        "javascript": 25,
+        "css": 15,
+        "fonts": 10
+      }
+    },
+    "rendering_analysis": {
+      "rendering_stages": {
+        "dom_construction": {
+          "time": 234,
+          "percentage": 15
+        },
+        "layout_calculation": {
+          "time": 156,
+          "percentage": 10
+        },
+        "painting": {
+          "time": 345,
+          "percentage": 22
+        },
+        "compositing": {
+          "time": 123,
+          "percentage": 8
+        }
+      },
+      "bottlenecks": [
+        {
+          "stage": "painting",
+          "impact": "high",
+          "time": 345
+        },
+        {
+          "stage": "dom_construction",
+          "impact": "medium",
+          "time": 234
+        }
+      ],
+      "optimization_suggestions": [
+        "Reduce DOM complexity",
+        "Optimize CSS selectors",
+        "Minimize repaints",
+        "Use transform for animations"
+      ]
+    }
+  },
+  "technical_metrics": {
+    "performance_score": 85.5,
+    "lcp_ms": 2500,
+    "fid_ms": 50.0,
+    "cls_score": 0.12,
+    "tti_ms": 3200,
+    "memory_mb": 45.0,
+    "requests_count": 45,
+    "page_size_kb": 1250,
+    "load_time_ms": 3200.0,
+    "fcp_ms": 1200,
+    "tbt_ms": 300.0,
+    "speed_index": 2800.0
+  },
+  "optimization_roadmap": [
+    {
+      "priority": "Quick Win",
+      "category": "Image Optimization",
+      "title": "Implement Image Optimization",
+      "description": "Optimize images for web delivery",
+      "estimated_improvement": "30-50%",
+      "timeline": "3-5 days",
+      "effort": "Low",
+      "roi": "High"
+    },
+    {
+      "priority": "Quick Win",
+      "category": "Caching Strategy",
+      "title": "Implement Caching Strategy",
+      "description": "Improve caching strategy for faster repeat visits",
+      "estimated_improvement": "25-40%",
+      "timeline": "3-5 days",
+      "effort": "Low",
+      "roi": "High"
+    }
+  ],
+  "benchmark_comparison": {
+    "comparisons": {
+      "performance_score": {
+        "current_value": 85.5,
+        "percentile": 75,
+        "benchmark": {
+          "average": 70,
+          "top_25": 85,
+          "top_10": 92
+        },
+        "status": "above_average"
+      },
+      "lcp_ms": {
+        "current_value": 2500,
+        "percentile": 75,
+        "benchmark": {
+          "average": 3200,
+          "good": 2500,
+          "needs_improvement": 4000
+        },
+        "status": "above_average"
+      },
+      "fid_ms": {
+        "current_value": 50.0,
+        "percentile": 75,
+        "benchmark": {
+          "average": 120,
+          "good": 100,
+          "needs_improvement": 300
+        },
+        "status": "above_average"
+      },
+      "cls_score": {
+        "current_value": 0.12,
+        "percentile": 75,
+        "benchmark": {
+          "average": 0.18,
+          "good": 0.1,
+          "needs_improvement": 0.25
+        },
+        "status": "above_average"
+      },
+      "requests_count": {
+        "current_value": 45,
+        "percentile": 75,
+        "benchmark": {
+          "average": 65,
+          "good": 50,
+          "poor": 100
+        },
+        "status": "above_average"
+      },
+      "page_size_kb": {
+        "current_value": 1250,
+        "percentile": 75,
+        "benchmark": {
+          "average": 2100,
+          "good": 1700,
+          "poor": 2500
+        },
+        "status": "above_average"
+      }
+    },
+    "overall_percentile": 75,
+    "summary": "Performance is above industry average across most metrics."
+  },
+  "visualization_data": {
+    "core_web_vitals": "{\"lcp\": {\"value\": 2500, \"score\": 100, \"status\": \"good\", \"gauge_data\": {\"segments\": [{\"start\": 0, \"end\": 2500, \"color\": \"#16a34a\"}, {\"start\": 2500, \"end\": 4000, \"color\": \"#f59e0b\"}, {\"start\": 4000, \"end\": 6000, \"color\": \"#dc2626\"}], \"pointer\": 2500}}, \"fid\": {\"value\": 50.0, \"score\": 100, \"status\": \"good\", \"gauge_data\": {\"segments\": [{\"start\": 0, \"end\": 100, \"color\": \"#16a34a\"}, {\"start\": 100, \"end\": 300, \"color\": \"#f59e0b\"}, {\"start\": 300, \"end\": 500, \"color\": \"#dc2626\"}], \"pointer\": 50.0}}, \"cls\": {\"value\": 0.12, \"score\": 50, \"status\": \"needs-improvement\", \"gauge_data\": {\"segments\": [{\"start\": 0, \"end\": 0.1, \"color\": \"#16a34a\"}, {\"start\": 0.1, \"end\": 0.25, \"color\": \"#f59e0b\"}, {\"start\": 0.25, \"end\": 0.5, \"color\": \"#dc2626\"}], \"pointer\": 0.12}}}",
+    "performance_radar": "{\"categories\": [\"Performance\", \"Accessibility\", \"Best Practices\", \"SEO\", \"PWA\", \"Security\"], \"datasets\": [{\"label\": \"Current Score\", \"data\": [75, 75, 75, 75, 75, 75], \"backgroundColor\": \"rgba(102, 126, 234, 0.2)\", \"borderColor\": \"rgba(102, 126, 234, 1)\", \"borderWidth\": 2}, {\"label\": \"Industry Average\", \"data\": [70, 80, 75, 78, 65, 85], \"backgroundColor\": \"rgba(245, 158, 11, 0.2)\", \"borderColor\": \"rgba(245, 158, 11, 1)\", \"borderWidth\": 2}, {\"label\": \"Target Score\", \"data\": [90, 95, 90, 92, 80, 95], \"backgroundColor\": \"rgba(16, 185, 129, 0.1)\", \"borderColor\": \"rgba(16, 185, 129, 1)\", \"borderWidth\": 1, \"borderDash\": [5, 5]}]}",
+    "resource_breakdown": "{\"labels\": [\"html\", \"css\", \"javascript\", \"images\", \"fonts\"], \"datasets\": [{\"label\": \"Size (KB)\", \"data\": [45, 120, 380, 650, 85], \"backgroundColor\": [\"#FF6B6B\", \"#4ECDC4\", \"#45B7D1\", \"#96CEB4\", \"#FFEAA7\"], \"borderWidth\": 2, \"borderColor\": \"#ffffff\"}]}",
+    "optimization_opportunities": "{\"categories\": [\"Image Optimization\", \"JavaScript Optimization\", \"Caching Strategy\"], \"impact_scores\": [8.5, 7.5, 8.0], \"effort_levels\": [\"Low\", \"Medium\", \"Low\"], \"savings\": [\"30-50%\", \"20-30%\", \"25-40%\"]}",
+    "performance_timeline": "{\"data\": [{\"time\": 0, \"event\": \"Navigation Start\", \"value\": 0}, {\"time\": 120, \"event\": \"DOM Content Loaded\", \"value\": 35}, {\"time\": 450, \"event\": \"First Paint\", \"value\": 55}, {\"time\": 800, \"event\": \"First Contentful Paint\", \"value\": 70}, {\"time\": 1200, \"event\": \"Largest Contentful Paint\", \"value\": 85}, {\"time\": 1800, \"event\": \"Time to Interactive\", \"value\": 95}, {\"time\": 2500, \"event\": \"Fully Loaded\", \"value\": 100}], \"events\": [\"Navigation Start\", \"DOM Content Loaded\", \"First Paint\", \"First Contentful Paint\", \"Largest Contentful Paint\", \"Time to Interactive\", \"Fully Loaded\"], \"times\": [0, 120, 450, 800, 1200, 1800, 2500], \"values\": [0, 35, 55, 70, 85, 95, 100]}",
+    "network_timing": "{\"stages\": [\"DNS Lookup\", \"TCP Connection\", \"SSL Handshake\", \"Server Response\", \"Content Download\"], \"times\": [45, 89, 156, 234, 567], \"colors\": [\"#FF6B6B\", \"#4ECDC4\", \"#45B7D1\", \"#96CEB4\", \"#FFEAA7\"]}",
+    "bottleneck_diagram": "{\"nodes\": [{\"id\": \"performance\", \"label\": \"Overall Performance\", \"type\": \"main\", \"size\": 30, \"color\": \"#667eea\"}], \"connections\": []}",
+    "performance_heatmap": "{\"scenarios\": [\"Homepage\", \"Product Page\", \"Search\", \"Checkout\", \"Profile\"], \"metrics\": [\"Load Time\", \"Interactivity\", \"Visual Stability\", \"Memory Usage\", \"Network\"], \"data\": [[84, 72, 73, 86, 64], [59, 66, 81, 60, 77], [73, 72, 83, 77, 63], [71, 69, 71, 68, 60], [58, 65, 70, 65, 64]], \"color_scale\": [[0.0, \"#dc2626\"], [0.5, \"#f59e0b\"], [0.7, \"#3b82f6\"], [1.0, \"#16a34a\"]]}"
+  },
+  "raw_data": {
+    "performance_matrix": [
+      {
+        "scenario": "Homepage",
+        "performance_score": 85.5,
+        "load_time_s": 3.2,
+        "memory_usage_mb": 45.0,
+        "first_contentful_paint_ms": 1200,
+        "largest_contentful_paint_ms": 2500,
+        "time_to_interactive_ms": 3200,
+        "cumulative_layout_shift": 0.12,
+        "accessibility_score": 95.0,
+        "total_requests": 45,
+        "total_size_kb": 1250,
+        "key_observations": [
+          "Good performance for Homepage",
+          "Consider image optimization",
+          "JavaScript bundle could be smaller"
+        ]
+      },
+      {
+        "scenario": "Dashboard",
+        "performance_score": 78.2,
+        "load_time_s": 4.1,
+        "memory_usage_mb": 52.0,
+        "first_contentful_paint_ms": 1450,
+        "largest_contentful_paint_ms": 3100,
+        "time_to_interactive_ms": 4100,
+        "cumulative_layout_shift": 0.18,
+        "accessibility_score": 92.0,
+        "total_requests": 62,
+        "total_size_kb": 1680,
+        "key_observations": [
+          "Good performance for Dashboard",
+          "Consider image optimization",
+          "JavaScript bundle could be smaller"
+        ]
+      },
+      {
+        "scenario": "Form Page",
+        "performance_score": 82.1,
+        "load_time_s": 2.9,
+        "memory_usage_mb": 38.0,
+        "first_contentful_paint_ms": 980,
+        "largest_contentful_paint_ms": 2200,
+        "time_to_interactive_ms": 2900,
+        "cumulative_layout_shift": 0.08,
+        "accessibility_score": 98.0,
+        "total_requests": 32,
+        "total_size_kb": 890,
+        "key_observations": [
+          "Good performance for Form Page",
+          "Consider image optimization",
+          "JavaScript bundle could be smaller"
+        ]
+      },
+      {
+        "scenario": "Search Results",
+        "performance_score": 76.8,
+        "load_time_s": 3.7,
+        "memory_usage_mb": 48.0,
+        "first_contentful_paint_ms": 1320,
+        "largest_contentful_paint_ms": 2800,
+        "time_to_interactive_ms": 3700,
+        "cumulative_layout_shift": 0.15,
+        "accessibility_score": 89.0,
+        "total_requests": 58,
+        "total_size_kb": 1420,
+        "key_observations": [
+          "Good performance for Search Results",
+          "Consider image optimization",
+          "JavaScript bundle could be smaller"
+        ]
+      }
+    ],
+    "network_timing": {
+      "dns_lookup": 45,
+      "tcp_connection": 89,
+      "ssl_handshake": 156,
+      "server_response": 234,
+      "content_download": 567
+    },
+    "memory_timeline": [],
+    "resource_details": {
+      "html": {
+        "count": 1,
+        "size": 45,
+        "time": 120
+      },
+      "css": {
+        "count": 3,
+        "size": 120,
+        "time": 89
+      },
+      "javascript": {
+        "count": 8,
+        "size": 380,
+        "time": 234
+      },
+      "images": {
+        "count": 25,
+        "size": 650,
+        "time": 567
+      },
+      "fonts": {
+        "count": 4,
+        "size": 85,
+        "time": 123
+      }
+    }
+  }
+}

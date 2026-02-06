@@ -1,0 +1,781 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Performance Analysis Report - demo_comprehensive_report</title>
+    <link rel="icon" type="image/x-icon" href="">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+
+            .report-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 2rem 0;
+            }
+            
+
+                .professional-header {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 2rem 0;
+                }
+                .executive-card {
+                    background: white;
+                    border-radius: 12px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    padding: 1.5rem;
+                    margin: 1rem 0;
+                }
+            
+
+        .executive-dashboard {
+            margin: 2rem 0;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #2563eb;
+        }
+        
+        .dashboard-card.primary {
+            border-left-color: #10b981;
+        }
+        
+        .score-badge {
+            background: #2563eb;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .core-web-vitals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .vital-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .vital-metric {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2563eb;
+            margin: 1rem 0;
+        }
+        
+        .priority-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .priority-badge.high { background: #dc2626; }
+        .priority-badge.medium { background: #f59e0b; }
+        .priority-badge.quick { background: #10b981; }
+        
+        .recommendations-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .recommendation-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .scores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .score-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .score-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        
+        .score-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+        }
+        
+        .score-fill {
+            height: 100%;
+            background: #10b981;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .comparisons-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        
+        .comparisons-table th,
+        .comparisons-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .above-average { background: #d1fae5; }
+        .below-average { background: #fee2e2; }
+        
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="report-header">
+        <div class="container">
+            <div class="header-content">
+                
+                <div class="header-text">
+                    <h1>Comprehensive Performance Analysis Report</h1>
+                    <div class="report-meta">
+                        <div><strong>URL:</strong> https://example-lowcode-app.com</div>
+                        <div><strong>Generated:</strong> 2026-02-03 01:21:24</div>
+                        <div><strong>Session:</strong> demo_comprehensive_report</div>
+                        <div><strong>Engine:</strong> LowCode Performance Scanner v2.0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            
+                    <section class="report-section" id="executive_summary">
+                        <div class="section-header">
+                            <h2>Executive Summary</h2>
+                            <div class="section-nav">
+                                <a href="#executive_summary" class="section-link">Permalink</a>
+                            </div>
+                        </div>
+                        <div class="section-content">
+                            
+        <div class="executive-dashboard">
+            <div class="dashboard-grid">
+                <div class="dashboard-card primary">
+                    <div class="card-header">
+                        <h3>Overall Performance</h3>
+                        <div class="score-badge">75th</div>
+                    </div>
+                    <div class="card-content">
+                        <p>Your site performs better than <strong>75%</strong> of websites tested</p>
+                        <div class="percentile-bar">
+                            <div class="percentile-fill" style="width: 75%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>Key Findings</h3>
+                    </div>
+                    <div class="card-content">
+                        <ul class="key-findings">
+                            <li>Performance consistency score of 85.0% indicates good consistency across test runs</li>
+<li>Resource efficiency ratio of 36.00 requests per MB suggests moderate resource usage</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>Priority Actions</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="priority-actions">
+                            
+            <div class="priority-action">
+                <div class="action-header">
+                    <span class="priority-badge quick-win">Quick Win</span>
+                    <span class="action-timeline">3-5 days</span>
+                </div>
+                <div class="action-title">Implement Image Optimization</div>
+                <div class="action-impact">30-50%</div>
+            </div>
+            
+
+            <div class="priority-action">
+                <div class="action-header">
+                    <span class="priority-badge quick-win">Quick Win</span>
+                    <span class="action-timeline">3-5 days</span>
+                </div>
+                <div class="action-title">Implement Caching Strategy</div>
+                <div class="action-impact">25-40%</div>
+            </div>
+            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+                        </div>
+                    </section>
+                    
+
+                    <section class="report-section" id="core_web_vitals">
+                        <div class="section-header">
+                            <h2>Core Web Vitals</h2>
+                            <div class="section-nav">
+                                <a href="#core_web_vitals" class="section-link">Permalink</a>
+                            </div>
+                        </div>
+                        <div class="section-content">
+                            
+        <div class="core-web-vitals-section">
+            <div class="vitals-overview">
+                <div class="vitals-grid">
+                    <div class="vital-card">
+                        <div class="vital-header">
+                            <h3>Largest Contentful Paint</h3>
+                            <div class="vital-metric">2.5s</div>
+                        </div>
+                        <div class="vital-chart">
+                            <canvas id="lcpChart" width="200" height="100"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="vital-card">
+                        <div class="vital-header">
+                            <h3>First Input Delay</h3>
+                            <div class="vital-metric">75ms</div>
+                        </div>
+                        <div class="vital-chart">
+                            <canvas id="fidChart" width="200" height="100"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="vital-card">
+                        <div class="vital-header">
+                            <h3>Cumulative Layout Shift</h3>
+                            <div class="vital-metric">0.15</div>
+                        </div>
+                        <div class="vital-chart">
+                            <canvas id="clsChart" width="200" height="100"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+                        </div>
+                    </section>
+                    
+
+                    <section class="report-section" id="performance_matrix">
+                        <div class="section-header">
+                            <h2>Performance Matrix</h2>
+                            <div class="section-nav">
+                                <a href="#performance_matrix" class="section-link">Permalink</a>
+                            </div>
+                        </div>
+                        <div class="section-content">
+                            
+        <div class="matrix-table-container">
+            <table class="performance-matrix-table">
+                <thead>
+                    <tr>
+                        <th>Test Scenario</th>
+                        <th>Score</th>
+                        <th>Load Time</th>
+                        <th>Memory</th>
+                        <th>FCP</th>
+                        <th>LCP</th>
+                        <th>TTI</th>
+                        <th>CLS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+            <tr class="matrix-row">
+                <td class="scenario-name">Homepage</td>
+                <td class="score-cell">
+                    <div class="score-display good">85.5</div>
+                </td>
+                <td class="metric-cell">3200ms</td>
+                <td class="metric-cell">45.0MB</td>
+                <td class="metric-cell">1200ms</td>
+                <td class="metric-cell">2500ms</td>
+                <td class="metric-cell">3200ms</td>
+                <td class="metric-cell">0.120</td>
+            </tr>
+            
+            <tr class="matrix-row">
+                <td class="scenario-name">Dashboard</td>
+                <td class="score-cell">
+                    <div class="score-display good">78.2</div>
+                </td>
+                <td class="metric-cell">4100ms</td>
+                <td class="metric-cell">52.0MB</td>
+                <td class="metric-cell">1450ms</td>
+                <td class="metric-cell">3100ms</td>
+                <td class="metric-cell">4100ms</td>
+                <td class="metric-cell">0.180</td>
+            </tr>
+            
+            <tr class="matrix-row">
+                <td class="scenario-name">Form Page</td>
+                <td class="score-cell">
+                    <div class="score-display good">82.1</div>
+                </td>
+                <td class="metric-cell">2900ms</td>
+                <td class="metric-cell">38.0MB</td>
+                <td class="metric-cell">980ms</td>
+                <td class="metric-cell">2200ms</td>
+                <td class="metric-cell">2900ms</td>
+                <td class="metric-cell">0.080</td>
+            </tr>
+            
+            <tr class="matrix-row">
+                <td class="scenario-name">Search Results</td>
+                <td class="score-cell">
+                    <div class="score-display good">76.8</div>
+                </td>
+                <td class="metric-cell">3700ms</td>
+                <td class="metric-cell">48.0MB</td>
+                <td class="metric-cell">1320ms</td>
+                <td class="metric-cell">2800ms</td>
+                <td class="metric-cell">3700ms</td>
+                <td class="metric-cell">0.150</td>
+            </tr>
+            
+                </tbody>
+            </table>
+        </div>
+        
+                        </div>
+                    </section>
+                    
+
+                    <section class="report-section" id="network_analysis">
+                        <div class="section-header">
+                            <h2>Network Analysis</h2>
+                            <div class="section-nav">
+                                <a href="#network_analysis" class="section-link">Permalink</a>
+                            </div>
+                        </div>
+                        <div class="section-content">
+                            
+        <div class="network-analysis">
+            <div class="network-metrics">
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h4>DNS Lookup</h4>
+                        <div class="metric-value">45ms</div>
+                        <div class="metric-status good">Good</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>TCP Connection</h4>
+                        <div class="metric-value">89ms</div>
+                        <div class="metric-status good">Good</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>SSL Handshake</h4>
+                        <div class="metric-value">156ms</div>
+                        <div class="metric-status needs-improvement">Needs Improvement</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Server Response</h4>
+                        <div class="metric-value">234ms</div>
+                        <div class="metric-status good">Good</div>
+                    </div>
+                </div>
+            </div>
+            <div class="network-chart">
+                <canvas id="networkTimingChart" width="800" height="300"></canvas>
+            </div>
+        </div>
+        
+                        </div>
+                    </section>
+                    
+
+                    <section class="report-section" id="resource_breakdown">
+                        <div class="section-header">
+                            <h2>Resource Breakdown</h2>
+                            <div class="section-nav">
+                                <a href="#resource_breakdown" class="section-link">Permalink</a>
+                            </div>
+                        </div>
+                        <div class="section-content">
+                            
+        <div class="resource-breakdown">
+            <div class="breakdown-grid">
+                <div class="breakdown-chart">
+                    <canvas id="resourceChart" width="400" height="400"></canvas>
+                </div>
+                <div class="breakdown-details">
+                    <div class="resource-item">
+                        <span class="resource-type">Images</span>
+                        <span class="resource-size">650 KB</span>
+                        <span class="resource-count">25 files</span>
+                    </div>
+                    <div class="resource-item">
+                        <span class="resource-type">JavaScript</span>
+                        <span class="resource-size">380 KB</span>
+                        <span class="resource-count">8 files</span>
+                    </div>
+                    <div class="resource-item">
+                        <span class="resource-type">CSS</span>
+                        <span class="resource-size">120 KB</span>
+                        <span class="resource-count">3 files</span>
+                    </div>
+                    <div class="resource-item">
+                        <span class="resource-type">Fonts</span>
+                        <span class="resource-size">85 KB</span>
+                        <span class="resource-count">4 files</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+                        </div>
+                    </section>
+                    
+
+                    <section class="report-section" id="optimization_recommendations">
+                        <div class="section-header">
+                            <h2>Optimization Recommendations</h2>
+                            <div class="section-nav">
+                                <a href="#optimization_recommendations" class="section-link">Permalink</a>
+                            </div>
+                        </div>
+                        <div class="section-content">
+                            
+        <div class="optimization-recommendations">
+            <div class="recommendations-list">
+                
+            <div class="recommendation-item">
+                <div class="recommendation-header">
+                    <span class="priority-badge quick-win">Quick Win</span>
+                    <h4>Implement Image Optimization</h4>
+                </div>
+                <p class="recommendation-description">Optimize images for web delivery</p>
+                <div class="recommendation-meta">
+                    <span class="timeline">3-5 days</span>
+                    <span class="effort">Effort: Low</span>
+                    <span class="roi">ROI: High</span>
+                </div>
+                <div class="estimated-impact">30-50%</div>
+            </div>
+            
+            <div class="recommendation-item">
+                <div class="recommendation-header">
+                    <span class="priority-badge quick-win">Quick Win</span>
+                    <h4>Implement Caching Strategy</h4>
+                </div>
+                <p class="recommendation-description">Improve caching strategy for faster repeat visits</p>
+                <div class="recommendation-meta">
+                    <span class="timeline">3-5 days</span>
+                    <span class="effort">Effort: Low</span>
+                    <span class="roi">ROI: High</span>
+                </div>
+                <div class="estimated-impact">25-40%</div>
+            </div>
+            
+            </div>
+        </div>
+        
+                        </div>
+                    </section>
+                    
+
+                    <section class="report-section" id="technical_analysis">
+                        <div class="section-header">
+                            <h2>Technical Analysis</h2>
+                            <div class="section-nav">
+                                <a href="#technical_analysis" class="section-link">Permalink</a>
+                            </div>
+                        </div>
+                        <div class="section-content">
+                            
+        <div class="technical-analysis">
+            <div class="scores-grid">
+                <div class="score-card">
+                    <h4>Loading Performance</h4>
+                    <div class="score-value">100</div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: 100.0%"></div>
+                    </div>
+                </div>
+                <div class="score-card">
+                    <h4>Interactivity</h4>
+                    <div class="score-value">100</div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: 100.0%"></div>
+                    </div>
+                </div>
+                <div class="score-card">
+                    <h4>Visual Stability</h4>
+                    <div class="score-value">50</div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: 50%"></div>
+                    </div>
+                </div>
+                <div class="score-card">
+                    <h4>Resource Efficiency</h4>
+                    <div class="score-value">100</div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: 100.0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+                        </div>
+                    </section>
+                    
+
+                    <section class="report-section" id="benchmark_comparison">
+                        <div class="section-header">
+                            <h2>Industry Benchmark Comparison</h2>
+                            <div class="section-nav">
+                                <a href="#benchmark_comparison" class="section-link">Permalink</a>
+                            </div>
+                        </div>
+                        <div class="section-content">
+                            
+        <div class="benchmark-comparison">
+            <div class="comparison-overview">
+                <div class="percentile-card">
+                    <h3>Overall Performance Percentile</h3>
+                    <div class="percentile-value">75th</div>
+                    <p>Better than 75% of websites</p>
+                </div>
+            </div>
+            <div class="detailed-comparisons">
+                
+        <table class="comparisons-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Current Value</th>
+                    <th>Percentile</th>
+                    <th>Industry Average</th>
+                    <th>Good Threshold</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+            <tr class="above-average">
+                <td>Performance Score</td>
+                <td>85.5</td>
+                <td>75th</td>
+                <td>70</td>
+                <td>N/A</td>
+            </tr>
+            
+            <tr class="above-average">
+                <td>Lcp Ms</td>
+                <td>2500</td>
+                <td>75th</td>
+                <td>3200</td>
+                <td>2500</td>
+            </tr>
+            
+            <tr class="above-average">
+                <td>Fid Ms</td>
+                <td>50.0</td>
+                <td>75th</td>
+                <td>120</td>
+                <td>100</td>
+            </tr>
+            
+            <tr class="above-average">
+                <td>Cls Score</td>
+                <td>0.12</td>
+                <td>75th</td>
+                <td>0.18</td>
+                <td>0.1</td>
+            </tr>
+            
+            <tr class="above-average">
+                <td>Requests Count</td>
+                <td>45</td>
+                <td>75th</td>
+                <td>65</td>
+                <td>50</td>
+            </tr>
+            
+            <tr class="above-average">
+                <td>Page Size Kb</td>
+                <td>1250</td>
+                <td>75th</td>
+                <td>2100</td>
+                <td>1700</td>
+            </tr>
+            
+            </tbody>
+        </table>
+        
+            </div>
+        </div>
+        
+                        </div>
+                    </section>
+                    
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="report-footer">
+        <div class="container">
+            <p>Demo Company | Professional Report | Generated by LowCode Performance Scanner</p>
+            
+        </div>
+    </footer>
+
+    <script>
+        
+        // Initialize charts when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            initializeCoreWebVitals();
+            initializePerformanceTimeline();
+            initializeResourceBreakdown();
+            initializeNetworkTiming();
+        });
+        
+        function initializeCharts() {
+            console.log('Initializing comprehensive performance charts...');
+            // Chart initialization code would go here
+        }
+        
+        function initializeCoreWebVitals() {
+            // Core Web Vitals gauge charts
+            const lcpData = {"lcp": {"value": 2500, "score": 100, "status": "good", "gauge_data": {"segments": [{"start": 0, "end": 2500, "color": "#16a34a"}, {"start": 2500, "end": 4000, "color": "#f59e0b"}, {"start": 4000, "end": 6000, "color": "#dc2626"}], "pointer": 2500}}, "fid": {"value": 50.0, "score": 100, "status": "good", "gauge_data": {"segments": [{"start": 0, "end": 100, "color": "#16a34a"}, {"start": 100, "end": 300, "color": "#f59e0b"}, {"start": 300, "end": 500, "color": "#dc2626"}], "pointer": 50.0}}, "cls": {"value": 0.12, "score": 50, "status": "needs-improvement", "gauge_data": {"segments": [{"start": 0, "end": 0.1, "color": "#16a34a"}, {"start": 0.1, "end": 0.25, "color": "#f59e0b"}, {"start": 0.25, "end": 0.5, "color": "#dc2626"}], "pointer": 0.12}}};
+            if (lcpData && lcpData.lcp) {
+                createGaugeChart('lcpChart', lcpData.lcp);
+            }
+        }
+        
+        function createGaugeChart(canvasId, data) {
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return;
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [data.score, 100 - data.score],
+                        backgroundColor: ['#10b981', '#e5e7eb'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+        
+        function initializePerformanceTimeline() {
+            // Performance timeline chart
+            const timelineData = {"data": [{"time": 0, "event": "Navigation Start", "value": 0}, {"time": 120, "event": "DOM Content Loaded", "value": 35}, {"time": 450, "event": "First Paint", "value": 55}, {"time": 800, "event": "First Contentful Paint", "value": 70}, {"time": 1200, "event": "Largest Contentful Paint", "value": 85}, {"time": 1800, "event": "Time to Interactive", "value": 95}, {"time": 2500, "event": "Fully Loaded", "value": 100}], "events": ["Navigation Start", "DOM Content Loaded", "First Paint", "First Contentful Paint", "Largest Contentful Paint", "Time to Interactive", "Fully Loaded"], "times": [0, 120, 450, 800, 1200, 1800, 2500], "values": [0, 35, 55, 70, 85, 95, 100]};
+            console.log('Timeline data:', timelineData);
+        }
+        
+        function initializeResourceBreakdown() {
+            // Resource breakdown chart
+            const resourceData = {"labels": ["html", "css", "javascript", "images", "fonts"], "datasets": [{"label": "Size (KB)", "data": [45, 120, 380, 650, 85], "backgroundColor": ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7"], "borderWidth": 2, "borderColor": "#ffffff"}]};
+            console.log('Resource data:', resourceData);
+        }
+        
+        function initializeNetworkTiming() {
+            // Network timing chart
+            const networkData = {"stages": ["DNS Lookup", "TCP Connection", "SSL Handshake", "Server Response", "Content Download"], "times": [45, 89, 156, 234, 567], "colors": ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7"]};
+            console.log('Network data:', networkData);
+        }
+        
+        // Utility functions
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        function formatDuration(ms) {
+            if (ms < 1000) return ms + 'ms';
+            return (ms / 1000).toFixed(1) + 's';
+        }
+        
+    </script>
+</body>
+</html>
+        

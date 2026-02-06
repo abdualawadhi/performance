@@ -1,0 +1,242 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Performance Analysis Report - demo_comprehensive_report</title>
+    <style>
+        
+        @media print {
+            body { margin: 0; padding: 20px; }
+            .report-container { max-width: none; }
+            section { page-break-inside: avoid; }
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .report-header {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .report-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        section {
+            margin-bottom: 40px;
+        }
+        
+        h2 {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        
+        .executive-summary-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+        
+        .metric-item {
+            text-align: center;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #10b981;
+        }
+        
+        .matrix-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        
+        .matrix-content th,
+        .matrix-content td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <header class="report-header">
+            <h1>Performance Analysis Report</h1>
+            <div class="report-info">
+                <p><strong>URL:</strong> https://example-lowcode-app.com</p>
+                <p><strong>Generated:</strong> 2026-02-03 01:21:24</p>
+                <p><strong>Session:</strong> demo_comprehensive_report</p>
+            </div>
+        </header>
+        
+        <section class="executive-summary">
+            <h2>Executive Summary</h2>
+            <div class="summary-content">
+                
+        <div class="executive-summary-content">
+            <div class="summary-metrics">
+                <div class="metric-item">
+                    <h3>Performance Percentile</h3>
+                    <div class="metric-value">75th</div>
+                    <p>Better than 75% of tested websites</p>
+                </div>
+            </div>
+            
+            <div class="key-findings">
+                <h3>Key Findings</h3>
+                <ul>
+                    <li>Performance consistency score of 85.0% indicates good consistency across test runs</li><li>Resource efficiency ratio of 36.00 requests per MB suggests moderate resource usage</li>
+                </ul>
+            </div>
+        </div>
+        
+            </div>
+        </section>
+        
+        <section class="performance-matrix">
+            <h2>Performance Matrix</h2>
+            <div class="matrix-content">
+                
+        <div class="matrix-table-container">
+            <table class="performance-matrix-table">
+                <thead>
+                    <tr>
+                        <th>Test Scenario</th>
+                        <th>Score</th>
+                        <th>Load Time</th>
+                        <th>Memory</th>
+                        <th>FCP</th>
+                        <th>LCP</th>
+                        <th>TTI</th>
+                        <th>CLS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+            <tr class="matrix-row">
+                <td class="scenario-name">Homepage</td>
+                <td class="score-cell">
+                    <div class="score-display good">85.5</div>
+                </td>
+                <td class="metric-cell">3200ms</td>
+                <td class="metric-cell">45.0MB</td>
+                <td class="metric-cell">1200ms</td>
+                <td class="metric-cell">2500ms</td>
+                <td class="metric-cell">3200ms</td>
+                <td class="metric-cell">0.120</td>
+            </tr>
+            
+            <tr class="matrix-row">
+                <td class="scenario-name">Dashboard</td>
+                <td class="score-cell">
+                    <div class="score-display good">78.2</div>
+                </td>
+                <td class="metric-cell">4100ms</td>
+                <td class="metric-cell">52.0MB</td>
+                <td class="metric-cell">1450ms</td>
+                <td class="metric-cell">3100ms</td>
+                <td class="metric-cell">4100ms</td>
+                <td class="metric-cell">0.180</td>
+            </tr>
+            
+            <tr class="matrix-row">
+                <td class="scenario-name">Form Page</td>
+                <td class="score-cell">
+                    <div class="score-display good">82.1</div>
+                </td>
+                <td class="metric-cell">2900ms</td>
+                <td class="metric-cell">38.0MB</td>
+                <td class="metric-cell">980ms</td>
+                <td class="metric-cell">2200ms</td>
+                <td class="metric-cell">2900ms</td>
+                <td class="metric-cell">0.080</td>
+            </tr>
+            
+            <tr class="matrix-row">
+                <td class="scenario-name">Search Results</td>
+                <td class="score-cell">
+                    <div class="score-display good">76.8</div>
+                </td>
+                <td class="metric-cell">3700ms</td>
+                <td class="metric-cell">48.0MB</td>
+                <td class="metric-cell">1320ms</td>
+                <td class="metric-cell">2800ms</td>
+                <td class="metric-cell">3700ms</td>
+                <td class="metric-cell">0.150</td>
+            </tr>
+            
+                </tbody>
+            </table>
+        </div>
+        
+            </div>
+        </section>
+        
+        <section class="recommendations">
+            <h2>Optimization Recommendations</h2>
+            <div class="recommendations-content">
+                
+        <div class="optimization-recommendations">
+            <div class="recommendations-list">
+                
+            <div class="recommendation-item">
+                <div class="recommendation-header">
+                    <span class="priority-badge quick-win">Quick Win</span>
+                    <h4>Implement Image Optimization</h4>
+                </div>
+                <p class="recommendation-description">Optimize images for web delivery</p>
+                <div class="recommendation-meta">
+                    <span class="timeline">3-5 days</span>
+                    <span class="effort">Effort: Low</span>
+                    <span class="roi">ROI: High</span>
+                </div>
+                <div class="estimated-impact">30-50%</div>
+            </div>
+            
+            <div class="recommendation-item">
+                <div class="recommendation-header">
+                    <span class="priority-badge quick-win">Quick Win</span>
+                    <h4>Implement Caching Strategy</h4>
+                </div>
+                <p class="recommendation-description">Improve caching strategy for faster repeat visits</p>
+                <div class="recommendation-meta">
+                    <span class="timeline">3-5 days</span>
+                    <span class="effort">Effort: Low</span>
+                    <span class="roi">ROI: High</span>
+                </div>
+                <div class="estimated-impact">25-40%</div>
+            </div>
+            
+            </div>
+        </div>
+        
+            </div>
+        </section>
+        
+        <footer class="report-footer">
+            <p>Generated by LowCode Performance Scanner | Demo Company</p>
+        </footer>
+    </div>
+</body>
+</html>
+        

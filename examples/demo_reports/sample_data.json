@@ -1,0 +1,55 @@
+{
+  "scan_results": [
+    {
+      "url": "https://example-app.com",
+      "timestamp": "2024-01-15T10:30:00Z",
+      "performance_score": 85.7,
+      "lcp_ms": 2800,
+      "fid_ms": 75,
+      "cls_score": 0.12,
+      "accessibility_score": 95,
+      "total_requests": 45,
+      "page_size_kb": 1250
+    },
+    {
+      "url": "https://example-app.com/dashboard",
+      "timestamp": "2024-01-15T10:35:00Z",
+      "performance_score": 78.2,
+      "lcp_ms": 3100,
+      "fid_ms": 120,
+      "cls_score": 0.18,
+      "accessibility_score": 92,
+      "total_requests": 62,
+      "page_size_kb": 1680
+    }
+  ],
+  "optimization_opportunities": [
+    {
+      "category": "Image Optimization",
+      "impact_score": 8.5,
+      "potential_savings": "30-50%",
+      "effort": "Low",
+      "timeline": "1-2 weeks"
+    },
+    {
+      "category": "JavaScript Optimization",
+      "impact_score": 7.5,
+      "potential_savings": "20-30%",
+      "effort": "Medium",
+      "timeline": "2-4 weeks"
+    }
+  ],
+  "benchmark_comparison": {
+    "overall_percentile": 75,
+    "comparisons": {
+      "performance_score": {
+        "current_value": 85.7,
+        "percentile": 80
+      },
+      "lcp_ms": {
+        "current_value": 2800,
+        "percentile": 70
+      }
+    }
+  }
+}

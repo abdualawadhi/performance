@@ -1,0 +1,5 @@
+Scenario,Performance Score,Load Time (s),Memory (MB),FCP (ms),LCP (ms),TTI (ms),CLS,Accessibility Score,Total Requests,Page Size (KB)
+"Homepage",85.5,3.20,45.0,1200,2500,3200,0.120,95.0,45,1250
+"Dashboard",78.2,4.10,52.0,1450,3100,4100,0.180,92.0,62,1680
+"Form Page",82.1,2.90,38.0,980,2200,2900,0.080,98.0,32,890
+"Search Results",76.8,3.70,48.0,1320,2800,3700,0.150,89.0,58,1420
