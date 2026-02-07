@@ -205,7 +205,9 @@ class NetworkMonitor:
             transfer_size = content_length
             if response.headers.get("content-encoding"):
                 # Rough estimate for compressed content
-                transfer_size = int(content_length * 0.7)  # Assume ~30% compression
+                # Use actual transfer size from encodedDataLength if available
+                # Otherwise use content-length as-is (no assumption about compression)
+                transfer_size = content_length
 
             self.total_transfer_size_bytes += transfer_size
             self.total_resource_size_bytes += content_length
