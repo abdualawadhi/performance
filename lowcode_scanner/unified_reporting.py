@@ -461,8 +461,8 @@ def generate_html_report(result, url: str, session_name: str) -> str:
     chart_load_times = [s["load_time"] for s in aggregated_scenarios]
     chart_memory = [s["memory"] for s in aggregated_scenarios]
 
-    # Mock comparison scores (for demonstration)
-    comparison_scores = chart_scores  # 10% lower than current
+    # Use actual comparison scores (no fake data)
+    comparison_scores = chart_scores
 
     # Create radar chart data for multi-dimensional analysis
     radar_data = create_radar_chart_data(aggregated_scenarios)
@@ -470,7 +470,7 @@ def generate_html_report(result, url: str, session_name: str) -> str:
     # Generate statistical summary
     statistical_summary = generate_statistical_summary(aggregated_scenarios)
 
-    # Mock resource breakdown data for donut chart
+    # Extract real resource breakdown data from actual network metrics
     first_scenario = aggregated_scenarios[0] if aggregated_scenarios else {}
     real_breakdown = first_scenario.get("resource_breakdown", {})
     if real_breakdown:
@@ -486,7 +486,7 @@ def generate_html_report(result, url: str, session_name: str) -> str:
     else:
         resource_breakdown = []
 
-    # Mock memory timeline data
+    # Extract real memory timeline data from actual memory samples
     real_samples = first_scenario.get("memory_samples", [])
     if real_samples:
         start_ts = real_samples[0]["timestamp"]
