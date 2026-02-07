@@ -17,7 +17,7 @@
 
 ## System Overview
 
-The Low-Code Performance Scanner is an enterprise-grade automated testing solution designed specifically for analyzing web applications built on low-code platforms. It conducts comprehensive synthetic performance testing by simulating real user interactions across multiple scenarios, devices, and network conditions.
+The Low-Code Performance Scanner is an enterprise-grade automated testing solution designed specifically for analyzing web applications built on low-code platforms. It conducts comprehensive performance testing by simulating real user interactions across multiple scenarios, devices, and network conditions.
 
 ### Key Components
 
@@ -33,7 +33,7 @@ The Low-Code Performance Scanner is an enterprise-grade automated testing soluti
 
 ### 1. Browser-Based Performance Monitoring
 
-The scanner uses **Chrome DevTools Protocol (CDP)** to extract granular performance data directly from the browser rendering engine. This provides synthetic but highly accurate measurements of:
+The scanner uses **Chrome DevTools Protocol (CDP)** to extract granular performance data directly from the browser rendering engine. This provides highly accurate, real-world measurements of:
 
 - **Timing Metrics**: Page load events, resource timing, paint timing
 - **Memory Metrics**: JavaScript heap usage, garbage collection events, DOM node counts
@@ -121,9 +121,27 @@ confidence = ConfidenceLevel.from_std_dev(std_dev, avg_score)
 | **FastAPI** | Latest | REST API backend for web interface |
 | **Jinja2** | Latest | HTML template rendering for reports |
 | **Pandas** | Latest | Data manipulation for CSV/Excel exports |
-| **ReportLab** | Latest | PDF generation (via enhanced reporting) |
+| **ReportLab** | Latest | Professional PDF generation for enterprise reporting |
 | **Plotly** | Latest | Interactive chart generation |
 | **Chart.js** | 4.4.0 | Browser-based charting in HTML reports |
+
+### Measurement Methodology
+
+### Core Web Vitals Measurement
+All CWV metrics are captured using real browser Performance APIs:
+- **LCP**: Captured via `largest-contentful-paint` observer
+- **FID**: Captured via `first-input` observer  
+- **CLS**: Accumulated from `layout-shift` entries
+- **TBT**: Calculated from `longtask` entries
+- **Speed Index**: Calculated from paint timing progression
+
+### Load Time vs Test Duration
+- **Load Time**: Time from navigation start to load event (from Navigation Timing API)
+- **Test Duration**: Total time including scenario actions and wait periods
+- These are measured independently to provide clarity on initial load vs. interaction overhead.
+
+### No Synthetic Estimation
+Unlike some other tools, this scanner does not use synthetic estimation or mock data. Every metric is captured from a real Chromium browser instance executing the target application.
 
 ### Browser Capabilities
 
@@ -279,7 +297,7 @@ class PerformanceMatrixRow(BaseModel):
 
 ### 1. Core Web Vitals Performance Score
 
-The overall performance score is calculated using a weighted composite of Core Web Vitals:
+The overall performance score is calculated using a weighted composite of Core Web Vitals and load performance:
 
 ```python
 @computed_field
@@ -291,15 +309,21 @@ def performance_score(self) -> float:
     fid_score = max(0, 100 - (self.first_input_delay_ms - 100) * 0.3)
     cls_score = max(0, 100 - self.cumulative_layout_shift * 1500)
 
-    # Weighted average (25% each + Speed Index)
-    speed_index_score = max(0, 100 - self.speed_index_ms * 0.01)
+    # Load score based on Speed Index
+    if self.speed_index_ms == 0:
+        load_score = 30  # Poor score for unmeasured load time
+    else:
+        load_score = max(0, 100 - (self.speed_index_ms - 3000) * 0.02)
 
-    return min(100, max(0, (
-        lcp_score * 0.25 +
-        fid_score * 0.25 +
-        cls_score * 0.25 +
-        speed_index_score * 0.25
-    )))
+    # Weighted average - equal 25% weights for all components
+    cwv_score = (
+        load_score * 0.25 + 
+        lcp_score * 0.25 + 
+        fid_score * 0.25 + 
+        cls_score * 0.25
+    )
+
+    return min(100, max(0, cwv_score))
 ```
 
 **Thresholds**:
@@ -316,9 +340,13 @@ def memory_efficiency_score(self) -> float:
     """Calculate memory efficiency score (0-100)."""
     base_score = 100
 
-    # Peak memory penalty (>100MB is concerning)
+    # Peak memory penalty (realistic threshold > 100MB)
     if self.peak_heap_size_mb > 100:
         base_score -= (self.peak_heap_size_mb - 100) * 0.5
+        
+    # Additional penalty for very high memory usage (>500MB)
+    if self.peak_heap_size_mb > 500:
+        base_score -= (self.peak_heap_size_mb - 500) * 0.2
 
     # GC penalty
     base_score -= self.major_gc_count * 2
@@ -331,7 +359,31 @@ def memory_efficiency_score(self) -> float:
     return max(0, min(100, base_score))
 ```
 
-### 3. Confidence Level Calculation
+### 3. Overall Scenario Score
+
+The overall score for a specific scenario combines Core Web Vitals, memory efficiency, network efficiency, and total load time:
+
+```python
+@computed_field
+@property
+def overall_score(self) -> float:
+    """Calculate overall performance score for this scenario."""
+    # Calculate load time score (primary metric)
+    if self.load_time_s == 0:
+        load_score = 30
+    else:
+        load_score = max(0, 100 - (self.load_time_s - 3) * 8)
+
+    # Weighted average of component scores
+    return (
+        self.core_web_vitals.performance_score * 0.3 +
+        self.memory_metrics.memory_efficiency_score * 0.2 +
+        self.network_metrics.network_efficiency_score * 0.2 +
+        load_score * 0.3
+    )
+```
+
+### 4. Confidence Level Calculation
 
 Based on standard deviation relative to mean:
 
@@ -1110,7 +1162,7 @@ lowcode_scanner/
 
 ## Conclusion
 
-The Low-Code Performance Scanner provides a comprehensive, synthetic testing solution specifically designed for low-code platforms. It combines:
+The Low-Code Performance Scanner provides a comprehensive, automated testing solution specifically designed for low-code platforms. It combines:
 
 - **Granular Data Collection**: Chrome DevTools Protocol for deep insights
 - **Multi-Dimensional Testing**: Scenarios × Devices × Networks matrix

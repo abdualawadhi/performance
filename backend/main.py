@@ -53,6 +53,9 @@ class ScanRequest(BaseModel):
             "regular_use_case",
             "heavy_list_load",
             "upfront_scripting",
+            "form_submission",
+            "data_filtering",
+            "page_navigation",
         ],
         description="Test scenarios to run",
     )
@@ -1026,6 +1029,21 @@ async def get_available_scenarios():
                 "id": "upfront_scripting",
                 "name": "Upfront Scripting",
                 "description": "Tests JavaScript bundle loading and execution",
+            },
+            {
+                "id": "form_submission",
+                "name": "Form Submission",
+                "description": "Tests form processing and validation",
+            },
+            {
+                "id": "data_filtering",
+                "name": "Data Filtering",
+                "description": "Tests client-side data filtering performance",
+            },
+            {
+                "id": "page_navigation",
+                "name": "Page Navigation",
+                "description": "Tests transition between application pages",
             },
         ]
     }
