@@ -578,7 +578,7 @@ Currently Chromium via Playwright. Firefox and WebKit support coming in future v
 
 ### Q: How accurate are the measurements?
 
-The scanner uses Chrome DevTools Protocol for high accuracy. Results are synthetic but highly reliable for relative comparisons.
+The scanner uses Chrome DevTools Protocol for high accuracy. Results are real measurements from a browser instance and highly reliable for performance analysis.
 
 ### Q: Can I export data?
 
